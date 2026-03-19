@@ -1,8 +1,10 @@
 from .models import (
     Department,
-    Document,
-    Session,
-    Question,
-    Answer,
+    DocumentTemplate,
+    TemplateSection,
+    SectionField,
+    UserSession,
+    SessionQuestion,
+    SessionAnswer,
     GeneratedDocument
 )
