@@ -54,7 +54,6 @@ class UserSession(Base):
     created_at = Column(DateTime, server_default=func.now())
     completed_at = Column(DateTime, nullable=True)
 
-
 class SessionQuestion(Base):
     __tablename__ = "session_questions"
 
@@ -62,6 +61,7 @@ class SessionQuestion(Base):
     session_id = Column(UUID(as_uuid=True), ForeignKey("user_sessions.id"), nullable=False)
     question_text = Column(Text, nullable=False)
     field_key = Column(String(100), nullable=False)
+    field_name = Column(String(100), nullable=True)  
     order_index = Column(Integer, nullable=False)
 
 
