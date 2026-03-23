@@ -167,11 +167,20 @@ def save_generated_document(
     title: str,
     content: str
 ):
+    # Count existing versions for this session
+    existing_count = db.query(GeneratedDocument).filter(
+        GeneratedDocument.session_id == session_id
+    ).count()
+
+    # Auto increment version
+    version = f"{existing_count + 1}.0"
+
     doc = GeneratedDocument(
         session_id=session_id,
         template_id=template_id,
         title=title,
         content=content,
+        version=version,
         validation_status="pending"
     )
     db.add(doc)
@@ -179,42 +188,7 @@ def save_generated_document(
     db.refresh(doc)
     return doc
 
-
-def get_document_by_session(db: Session, session_id: UUID):
+def get_documents_by_session(db: Session, session_id: UUID):
     return db.query(GeneratedDocument).filter(
         GeneratedDocument.session_id == session_id
-    ).first()
-
-
-def get_document_by_id(db: Session, document_id: int):
-    return db.query(GeneratedDocument).filter(
-        GeneratedDocument.id == document_id
-    ).first()
-
-
-def get_all_documents(db: Session, department_id: int = None, template_id: int = None):
-    query = db.query(GeneratedDocument)
-    if department_id:
-        query = query.join(UserSession).filter(
-            UserSession.department_id == department_id
-        )
-    if template_id:
-        query = query.filter(
-            GeneratedDocument.template_id == template_id
-        )
-    return query.order_by(GeneratedDocument.created_at.desc()).all()
-
-
-def update_document_validation(
-    db: Session,
-    document_id: int,
-    status: str,
-    notes: str = None
-):
-    doc = get_document_by_id(db, document_id)
-    if doc:
-        doc.validation_status = status
-        doc.validation_notes = notes
-        db.commit()
-        db.refresh(doc)
-    return doc
+    ).order_by(GeneratedDocument.created_at.desc()).all()
