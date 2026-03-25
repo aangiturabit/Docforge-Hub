@@ -154,3 +154,28 @@ class NotionPublishResponse(BaseModel):
     status: str
     notion_page_id: Optional[str] = None
     message: Optional[str] = None
+
+
+# ─────────────────────────────────────────
+# VALIDATE DOCUMENT SCHEMAS
+# ─────────────────────────────────────────
+
+class ValidateDocumentRequest(BaseModel):
+    document_id: int
+
+
+class ValidateDocumentResponse(BaseModel):
+    document_id: int
+    is_valid: bool
+    missing_sections: List[str]
+    validation_notes: str
+
+
+# ─────────────────────────────────────────
+# REGENERATE DOCUMENT SCHEMAS
+# ─────────────────────────────────────────
+
+class RegenerateDocumentRequest(BaseModel):
+    session_id: UUID
+    answers: Optional[Dict[str, str]] = None
+    feedback: Optional[str] = None

@@ -1,34 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from uuid import UUID
-from typing import Optional, Dict
 from backend.database.connection import get_db
 from backend.database import crud
 from backend.schemas.schemas import (
     GenerateQuestionsRequest,
     GenerateQuestionsResponse,
     GenerateDocumentRequest,
-    GeneratedDocumentResponse
+    GeneratedDocumentResponse,
+    ValidateDocumentRequest,
+    ValidateDocumentResponse,
+    RegenerateDocumentRequest
 )
-from backend.services import (
-    question_service,
-    prompt_service,
-    llm_service,
-    document_service
-)
-from pydantic import BaseModel
+from backend.services import question_service, prompt_service, llm_service, document_service
 
 router = APIRouter()
-
-
-class ValidateDocumentRequest(BaseModel):
-    document_id: int
-
-
-class RegenerateDocumentRequest(BaseModel):
-    session_id: UUID
-    answers: Optional[Dict[str, str]] = None
-    feedback: Optional[str] = None
 
 
 # ─────────────────────────────────────────
@@ -60,7 +45,12 @@ def generate_document(
         raise HTTPException(status_code=404, detail="Session not found")
 
     template = crud.get_template_by_id(db, request.template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
     department = crud.get_department_by_id(db, request.department_id)
+    if not department:
+        raise HTTPException(status_code=404, detail="Department not found")
 
     crud.update_session_status(db, request.session_id, "in_progress")
 
@@ -107,6 +97,7 @@ def get_document(
     doc = crud.get_document_by_id(db, document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
+
     return GeneratedDocumentResponse(
         document_id=doc.id,
         session_id=doc.session_id,
@@ -121,7 +112,7 @@ def get_document(
 # 4. VALIDATE DOCUMENT
 # ─────────────────────────────────────────
 
-@router.post("/generate/validate")
+@router.post("/generate/validate", response_model=ValidateDocumentResponse)
 def validate_document(
     request: ValidateDocumentRequest,
     db: Session = Depends(get_db)
