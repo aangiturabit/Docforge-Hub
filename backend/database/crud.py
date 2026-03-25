@@ -192,3 +192,29 @@ def get_documents_by_session(db: Session, session_id: UUID):
     return db.query(GeneratedDocument).filter(
         GeneratedDocument.session_id == session_id
     ).order_by(GeneratedDocument.created_at.desc()).all()
+
+def get_document_by_id(db: Session, document_id: int):
+    return db.query(GeneratedDocument).filter(
+        GeneratedDocument.id == document_id
+    ).first()
+
+def update_document_validation(
+    db: Session,
+    document_id: int,
+    status: str,
+    notes: str
+):
+    doc = db.query(GeneratedDocument).filter(
+        GeneratedDocument.id == document_id
+    ).first()
+
+    if not doc:
+        return None
+
+    doc.validation_status = status
+    doc.validation_notes = notes
+
+    db.commit()
+    db.refresh(doc)
+
+    return doc

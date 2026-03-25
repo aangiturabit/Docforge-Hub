@@ -11,7 +11,10 @@ from backend.schemas.schemas import (
     ValidateDocumentResponse,
     RegenerateDocumentRequest
 )
-from backend.services import question_service, prompt_service, llm_service, document_service
+from backend.services import question_service
+from backend.services import prompt_service
+from backend.services import llm_service
+from backend.services import document_service
 
 router = APIRouter()
 
