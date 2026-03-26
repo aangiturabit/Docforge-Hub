@@ -86,3 +86,4 @@ class GeneratedDocument(Base):
     validation_status = Column(String(50), default="pending")
     validation_notes = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
+    is_draft = Column(Boolean, default=False)

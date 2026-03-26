@@ -9,7 +9,11 @@ from backend.schemas.schemas import (
     GeneratedDocumentResponse,
     ValidateDocumentRequest,
     ValidateDocumentResponse,
-    RegenerateDocumentRequest
+    RegenerateDocumentRequest,
+    PreviewDocumentRequest,
+    PreviewDocumentResponse,
+    RegenerateSectionRequest,
+    RegenerateSectionResponse
 )
 from backend.services import question_service
 from backend.services import prompt_service
@@ -35,7 +39,40 @@ def generate_questions(
 
 
 # ─────────────────────────────────────────
-# 2. GENERATE DOCUMENT
+# 2. PREVIEW DOCUMENT (no save)
+# ─────────────────────────────────────────
+
+@router.post("/generate/preview", response_model=PreviewDocumentResponse)
+def preview_document(
+    request: PreviewDocumentRequest,
+    db: Session = Depends(get_db)
+):
+    template = crud.get_template_by_id(db, request.template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    department = crud.get_department_by_id(db, request.department_id)
+    if not department:
+        raise HTTPException(status_code=404, detail="Department not found")
+
+    content = document_service.preview_document(
+        db=db,
+        department_name=department.name,
+        template_name=template.name,
+        template_description=template.description,
+        template_id=request.template_id,
+        answers=request.answers
+    )
+
+    return PreviewDocumentResponse(
+        content=content,
+        department=department.name,
+        template=template.name
+    )
+
+
+# ─────────────────────────────────────────
+# 3. GENERATE DOCUMENT (save to DB)
 # ─────────────────────────────────────────
 
 @router.post("/generate/document", response_model=GeneratedDocumentResponse)
@@ -77,29 +114,6 @@ def generate_document(
     )
 
     crud.update_session_status(db, request.session_id, "completed")
-
-    return GeneratedDocumentResponse(
-        document_id=doc.id,
-        session_id=doc.session_id,
-        title=doc.title,
-        content=doc.content,
-        validation_status=doc.validation_status,
-        created_at=doc.created_at
-    )
-
-
-# ─────────────────────────────────────────
-# 3. GET DOCUMENT BY ID
-# ─────────────────────────────────────────
-
-@router.get("/generate/document/{document_id}", response_model=GeneratedDocumentResponse)
-def get_document(
-    document_id: int,
-    db: Session = Depends(get_db)
-):
-    doc = crud.get_document_by_id(db, document_id)
-    if not doc:
-        raise HTTPException(status_code=404, detail="Document not found")
 
     return GeneratedDocumentResponse(
         document_id=doc.id,
@@ -167,6 +181,56 @@ def regenerate_document(
         title=template.name,
         content=content
     )
+
+    return GeneratedDocumentResponse(
+        document_id=doc.id,
+        session_id=doc.session_id,
+        title=doc.title,
+        content=doc.content,
+        validation_status=doc.validation_status,
+        created_at=doc.created_at
+    )
+
+
+# ─────────────────────────────────────────
+# 6. REGENERATE SECTION
+# ─────────────────────────────────────────
+
+@router.post("/generate/section", response_model=RegenerateSectionResponse)
+def regenerate_section(
+    request: RegenerateSectionRequest,
+    db: Session = Depends(get_db)
+):
+    doc = crud.get_document_by_id(db, request.document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    result = document_service.regenerate_section(
+        db=db,
+        document_id=request.document_id,
+        section_name=request.section_name,
+        answers=request.answers,
+        feedback=request.feedback
+    )
+
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+
+    return result
+
+
+# ─────────────────────────────────────────
+# 7. GET DOCUMENT BY ID
+# ─────────────────────────────────────────
+
+@router.get("/generate/document/{document_id}", response_model=GeneratedDocumentResponse)
+def get_document(
+    document_id: int,
+    db: Session = Depends(get_db)
+):
+    doc = crud.get_document_by_id(db, document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
 
     return GeneratedDocumentResponse(
         document_id=doc.id,

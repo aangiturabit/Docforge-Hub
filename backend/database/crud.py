@@ -218,3 +218,106 @@ def update_document_validation(
     db.refresh(doc)
 
     return doc
+
+# ─────────────────────────────────────────
+# DOCUMENT DRAFTS
+# ─────────────────────────────────────────
+
+def save_document_as_draft(
+    db: Session,
+    session_id: UUID,
+    template_id: int,
+    title: str,
+    content: str
+):
+    existing_count = db.query(GeneratedDocument).filter(
+        GeneratedDocument.session_id == session_id
+    ).count()
+    version = f"{existing_count + 1}.0"
+
+    doc = GeneratedDocument(
+        session_id=session_id,
+        template_id=template_id,
+        title=title,
+        content=content,
+        version=version,
+        validation_status="draft",
+        is_draft=True
+    )
+    db.add(doc)
+    db.commit()
+    db.refresh(doc)
+    return doc
+
+
+def get_all_drafts(db: Session):
+    return db.query(GeneratedDocument).filter(
+        GeneratedDocument.is_draft == True
+    ).order_by(GeneratedDocument.created_at.desc()).all()
+
+
+def get_draft_by_id(db: Session, document_id: int):
+    return db.query(GeneratedDocument).filter(
+        GeneratedDocument.id == document_id,
+        GeneratedDocument.is_draft == True
+    ).first()
+
+
+def publish_draft(db: Session, document_id: int):
+    doc = get_document_by_id(db, document_id)
+    if doc:
+        doc.is_draft = False
+        doc.validation_status = "pending"
+        db.commit()
+        db.refresh(doc)
+    return doc
+
+
+def delete_document(db: Session, document_id: int):
+    doc = get_document_by_id(db, document_id)
+    if doc:
+        db.delete(doc)
+        db.commit()
+    return True
+
+
+def get_documents_by_session(db: Session, session_id: UUID):
+    return db.query(GeneratedDocument).filter(
+        GeneratedDocument.session_id == session_id
+    ).order_by(GeneratedDocument.created_at.desc()).all()
+
+
+def update_document_section(
+    db: Session,
+    document_id: int,
+    section_name: str,
+    new_content: str
+):
+    doc = get_document_by_id(db, document_id)
+    if not doc:
+        return None
+    old_content = doc.content
+    doc.content = old_content.replace(
+        _find_section_content(old_content, section_name),
+        new_content
+    )
+    db.commit()
+    db.refresh(doc)
+    return doc
+
+
+def _find_section_content(content: str, section_name: str) -> str:
+    lines = content.split('\n')
+    section_start = -1
+    section_end = len(lines)
+
+    for i, line in enumerate(lines):
+        if section_name.lower() in line.lower():
+            section_start = i
+        elif section_start != -1 and line.startswith('#'):
+            section_end = i
+            break
+
+    if section_start == -1:
+        return ""
+    return '\n'.join(lines[section_start:section_end])

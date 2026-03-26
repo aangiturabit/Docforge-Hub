@@ -28,7 +28,7 @@ def generate_with_llm(prompt: str) -> str:
                 }
             ],
             max_tokens=4000,
-            temperature=0.7
+            temperature=0.1
         )
         return response.choices[0].message.content
 

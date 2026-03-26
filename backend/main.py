@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import departments, templates, generate, sessions, notion
+from backend.routers import departments, templates, generate, sessions, notion ,documents
+
+
 
 app = FastAPI(
     title="DocForge Hub",
@@ -27,6 +29,7 @@ app.include_router(templates.router, prefix="/api", tags=["Templates"])
 app.include_router(generate.router, prefix="/api", tags=["Generate"])
 app.include_router(sessions.router, prefix="/api", tags=["Sessions"])
 app.include_router(notion.router, prefix="/api", tags=["Notion"])
+app.include_router(documents.router, prefix="/api", tags=["Documents"])
 
 # ─────────────────────────────────────────
 # HEALTH CHECK

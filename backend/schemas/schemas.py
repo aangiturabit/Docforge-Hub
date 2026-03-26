@@ -179,3 +179,63 @@ class RegenerateDocumentRequest(BaseModel):
     session_id: UUID
     answers: Optional[Dict[str, str]] = None
     feedback: Optional[str] = None
+
+
+# ─────────────────────────────────────────
+# PREVIEW SCHEMA
+# ─────────────────────────────────────────
+
+class PreviewDocumentRequest(BaseModel):
+    department_id: int
+    template_id: int
+    answers: Dict[str, str]
+
+
+class PreviewDocumentResponse(BaseModel):
+    content: str
+    department: str
+    template: str
+
+
+# ─────────────────────────────────────────
+# DRAFT SCHEMAS
+# ─────────────────────────────────────────
+
+class DraftResponse(BaseModel):
+    id: int
+    session_id: UUID
+    title: str
+    content: str
+    version: str
+    is_draft: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ─────────────────────────────────────────
+# SECTION REGENERATE SCHEMA
+# ─────────────────────────────────────────
+
+class RegenerateSectionRequest(BaseModel):
+    document_id: int
+    section_name: str
+    answers: Optional[Dict[str, str]] = None
+    feedback: Optional[str] = None
+
+
+class RegenerateSectionResponse(BaseModel):
+    document_id: int
+    section_name: str
+    updated_content: str
+
+
+# ─────────────────────────────────────────
+# DOCUMENT LIBRARY FILTER SCHEMA
+# ─────────────────────────────────────────
+
+class DocumentFilterRequest(BaseModel):
+    department_id: Optional[int] = None
+    template_id: Optional[int] = None
+    is_draft: Optional[bool] = None
