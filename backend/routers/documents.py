@@ -17,13 +17,14 @@ router = APIRouter()
 # GET ALL DOCUMENTS (library)
 # ─────────────────────────────────────────
 
-@router.get("/documents", response_model=List[GeneratedDocumentResponse])
+@router.get("", response_model=List[GeneratedDocumentResponse])
 def get_all_documents(
     department_id: Optional[int] = None,
     template_id: Optional[int] = None,
     db: Session = Depends(get_db)
 ):
     docs = crud.get_all_documents(db, department_id, template_id)
+
     return [
         GeneratedDocumentResponse(
             document_id=d.id,
@@ -32,9 +33,9 @@ def get_all_documents(
             content=d.content,
             validation_status=d.validation_status,
             created_at=d.created_at
-        ) for d in docs
+        )
+        for d in docs
     ]
-
 
 # ─────────────────────────────────────────
 # GET DOCUMENT BY ID

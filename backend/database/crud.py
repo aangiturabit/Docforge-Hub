@@ -9,6 +9,7 @@ from backend.database.models import (
     SessionAnswer,
     GeneratedDocument
 )
+
 from uuid import UUID
 import uuid
 
@@ -39,6 +40,7 @@ def get_template_by_id(db: Session, template_id: int):
     return db.query(DocumentTemplate).filter(
         DocumentTemplate.id == template_id
     ).first()
+
 
 
 # ─────────────────────────────────────────
@@ -321,3 +323,13 @@ def _find_section_content(content: str, section_name: str) -> str:
     if section_start == -1:
         return ""
     return '\n'.join(lines[section_start:section_end])
+
+
+
+def get_all_documents(db, department_id=None, template_id=None):
+    query = db.query(GeneratedDocument)
+
+    if template_id:
+        query = query.filter(GeneratedDocument.template_id == template_id)
+
+    return query.order_by(GeneratedDocument.created_at.desc()).all()
