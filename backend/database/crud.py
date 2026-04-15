@@ -12,6 +12,7 @@ from backend.database.models import (
 
 from uuid import UUID
 import uuid
+import json
 
 
 # ─────────────────────────────────────────
@@ -163,26 +164,31 @@ def get_answers_by_session(db: Session, session_id: UUID):
 # ─────────────────────────────────────────
 
 def save_generated_document(
-    db: Session,
-    session_id: UUID,
+    db,
+    session_id,
     template_id: int,
     title: str,
-    content: str
+    content: str,
+    structured_json: str = None,
+    version: str = None
 ):
-    # Count existing versions for this session
+    from backend.database.models import GeneratedDocument
     existing_count = db.query(GeneratedDocument).filter(
         GeneratedDocument.session_id == session_id
     ).count()
+    doc_version = version or f"{existing_count + 1}.0"
 
-    # Auto increment version
-    version = f"{existing_count + 1}.0"
+    # structured_json must always be stored as str
+    if isinstance(structured_json, (dict, list)):
+        structured_json = json.dumps(structured_json)
 
     doc = GeneratedDocument(
         session_id=session_id,
         template_id=template_id,
         title=title,
         content=content,
-        version=version,
+        structured_json=structured_json,
+        version=doc_version,
         validation_status="pending"
     )
     db.add(doc)
@@ -325,9 +331,15 @@ def _find_section_content(content: str, section_name: str) -> str:
     return '\n'.join(lines[section_start:section_end])
 
 
-
 def get_all_documents(db, department_id=None, template_id=None):
+    from backend.database.models import DocumentTemplate
     query = db.query(GeneratedDocument)
+
+    if department_id:
+        query = query.join(
+            DocumentTemplate,
+            GeneratedDocument.template_id == DocumentTemplate.id
+        ).filter(DocumentTemplate.department_id == department_id)
 
     if template_id:
         query = query.filter(GeneratedDocument.template_id == template_id)

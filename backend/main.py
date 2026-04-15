@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers import departments, templates, generate, sessions, notion ,documents
-
+from backend.routers import notion
 
 
 app = FastAPI(
@@ -45,3 +45,4 @@ def health_check():
 @app.get("/health", tags=["Health"])
 def health():
     return {"status": "ok"}
+
