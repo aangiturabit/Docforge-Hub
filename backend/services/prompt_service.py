@@ -1,245 +1,3 @@
-# from sqlalchemy.orm import Session
-# from backend.database import crud
-# from typing import Dict, Optional
-# from backend.services import llm_service
-# import json
-# import hashlib
-
-# # ─────────────────────────────────────────
-# # IN-MEMORY CACHE
-# # ─────────────────────────────────────────
-# _document_cache: dict = {}
-
-# def _make_document_cache_key(
-#     department_name: str,
-#     template_name: str,
-#     template_id: int,
-#     answers: Dict[str, str],
-#     feedback: Optional[str] = None,
-#     company: Optional[Dict] = None   
-# ) -> str:
-#     """Create stable cache key for document generation"""
-#     sorted_answers = sorted(answers.items())
-
-#     company_part = json.dumps(company, sort_keys=True) if company else ""
-
-#     raw = f"{department_name}:{template_name}:{template_id}:{json.dumps(sorted_answers)}:{feedback or ''}:{company_part}"
-#     return hashlib.md5(raw.encode()).hexdigest()
-
-
-# # ─────────────────────────────────────────
-# # SYSTEM PROMPT
-# # ─────────────────────────────────────────
-# DOCUMENT_SYSTEM_PROMPT = """
-# You are an expert professional business document writer for  SaaS companies.
-# Create premium-quality, comprehensive, engaging, and polished business documents that are executive-ready and suitable for direct PDF conversion.
-# For the sections that require the numerical answer should be static in some questions according the document requirements. 
-
-
-# Core Requirements:
-# - Use ONLY the exact information provided in the User Provided Information. Never add, invent, assume, or hallucinate any extra details, dates, names, amounts, or clauses.
-# - If information is missing for any section, use "Not Provided" or a short professional placeholder. Do not fabricate content.
-# - Follow the exact section names and order given by the user. Never change, add, remove, or rename any section heading.
-# - Make every section heading clear and prominent using Markdown: ## Section Name
-# - Write each section in a highly professional, formal yet warm tone suitable for SaaS business documents.
-# - Expand every section with rich, detailed, and substantial content. Avoid short or generic text.
-
-# Word Limit Guidelines for Lengthy Documents:
-# - Short sections (header, date, parties): 80–200 words
-# - Standard sections (introduction, scope, terms): 300–500 words
-# - Detailed sections (CTC breakdown, responsibilities, confidentiality, conditions): 500–900+ words
-# - Overall document should feel comprehensive and professional don't make it too cluster for a user to read the content (typically 1000–3000+ words depending on the template).
-
-# Formatting Rules:
-# - Use clean Markdown.
-# - Use tables for breakdowns, amounts, lists, or comparisons.
-# - Do not repeat information unnecessarily across sections.
-# - Output ONLY the final document content. No explanations, no introductions, no meta text, and no code blocks.
-
-# Start directly with the document using the exact section headings provided.
-# """
-
-# # ─────────────────────────────────────────
-# # FEW-SHOT EXAMPLE 
-# # ─────────────────────────────────────────
-# FEW_SHOT_EXAMPLES = """
-# Good output example style for an Offer Letter:
-
-# ## Company Letterhead and Date
-# NexusCloud Solutions Pvt. Ltd.
-# Ahmedabad, Gujarat, India
-# Date: 30 March 2026
-
-# ## Candidate Full Name and Address
-# Priya Sharma
-# [Full Address as provided]
-
-# ## Offer of Employment
-# We are delighted to extend this formal offer of employment for the position of Senior Software Engineer...
-
-# ## Gross CTC Breakdown
-# | Component                | Amount (₹)     |
-# |--------------------------|----------------|
-# | Basic Salary             | 18,00,000      |
-# | House Rent Allowance     | 7,20,000       |
-# [Full detailed table...]
-
-# ## Terms and Conditions
-# [Long, detailed paragraph(s) covering all aspects using only provided data...]
-
-# Continue this style for all sections with rich, professional, and lengthy content.
-# """
-
-# # ─────────────────────────────────────────
-# # PROMPT BUILDER
-# # ─────────────────────────────────────────
-# def build_prompt(
-#     db: Session,
-#     department_name: str,
-#     template_name: str,
-#     template_description: str,
-#     template_id: int,
-#     answers: Dict[str, str],
-#     company: Optional[Dict] = None
-# ) -> str:
-
-    
-#     if company:
-#         company_context_text = f"""
-# Company Context:
-# - Company Name: {company.get("name", "Not specified")}
-# - Industry: {company.get("industry", "Not specified")}
-# - Company Size: {company.get("size", "Not specified")}
-# - Location: {company.get("location", "Not specified")}
-# - Tone: {company.get("tone", "Professional")}
-# """
-#     else:
-#         company_context_text = """
-# Company Context:
-# - Not specified. Use a neutral professional tone.
-# """
-
-#     sections = crud.get_sections_by_template(db, template_id)
-#     sections_list = "\n".join([f"- {s.section_name}" for s in sections])
-
-#     answers_formatted = "\n".join([
-#         f"- {key}: {value}"
-#         for key, value in answers.items()
-#         if value and str(value).strip()
-#     ])
-
-#     user_prompt = f"""
-# {FEW_SHOT_EXAMPLES}
-
-# {company_context_text}
-
-# Department: {department_name}
-# Document Type: {template_name}
-# Description: {template_description}
-
-# Required Sections:
-# {sections_list}
-
-# User Provided Information:
-# {answers_formatted if answers_formatted else "No specific details provided."}
-
-# IMPORTANT:
-# - Use the company context to adjust tone, writing style, and level of formality
-# - Do not add information not provided & maintain the exact section headings and order. Don't hallicinate any details and dont repeat the content across sections.
-# - Make every section detailed, professional, and substantial while following the word limit guidelines. maintain a proper length content for each section based on its importance and type.
-
-# Generate a comprehensive, lengthy, and premium-quality {template_name} document.
-# Make every section detailed and substantial while strictly following the rules and word guidelines above.
-# """
-
-
-#     return user_prompt
-
-
-# # ─────────────────────────────────────────
-# # REGENERATE PROMPT BUILDER
-# # ─────────────────────────────────────────
-# def build_regenerate_prompt(
-#     db: Session,
-#     department_name: str,
-#     template_name: str,
-#     template_description: str,
-#     template_id: int,
-#     answers: Dict[str, str],
-#     feedback: Optional[str] = None,
-#     company: Optional[Dict] = None   
-# ) -> str:
-
-#     base_prompt = build_prompt(
-#         db=db,
-#         department_name=department_name,
-#         template_name=template_name,
-#         template_description=template_description,
-#         template_id=template_id,
-#         answers=answers,
-#         company=company   
-#     )
-
-#     if feedback:
-#         base_prompt += f"""
-
-# User Feedback:
-# {feedback}
-
-# Regenerate the document incorporating this feedback.
-# Keep tone consistent with company context.
-# """
-
-#     return base_prompt
-
-
-# # ─────────────────────────────────────────
-# # MAIN DOCUMENT GENERATION
-# # ─────────────────────────────────────────
-# def generate_document(
-#     db: Session,
-#     department_name: str,
-#     template_name: str,
-#     template_description: str,
-#     template_id: int,
-#     answers: Dict[str, str],
-#     feedback: Optional[str] = None,
-#     company: Optional[Dict] = None  
-# ) -> str:
-
-#     cache_key = _make_document_cache_key(
-#         department_name,
-#         template_name,
-#         template_id,
-#         answers,
-#         feedback,
-#         company   
-#     )
-
-#     if cache_key in _document_cache:
-#         return _document_cache[cache_key]
-
-#     user_prompt = build_regenerate_prompt(
-#         db=db,
-#         department_name=department_name,
-#         template_name=template_name,
-#         template_description=template_description,
-#         template_id=template_id,
-#         answers=answers,
-#         feedback=feedback,
-#         company=company   
-#     )
-
-    
-#     response = llm_service.generate_with_llm(user_prompt)
-
-#     cleaned_response = response.strip()
-
-#     if cleaned_response.startswith("```"):
-#         cleaned_response = cleaned_response.split("```", 1)[1].split("```", 1)[0].strip()
-
-#     _document_cache[cache_key] = cleaned_response
-#     return cleaned_response
 
 from sqlalchemy.orm import Session
 from backend.database import crud
@@ -266,7 +24,10 @@ def _make_cache_key(
 ) -> str:
     sorted_answers = sorted(answers.items())
     company_part = json.dumps(company, sort_keys=True) if company else ""
-    raw = f"{department_name}:{template_name}:{template_id}:{json.dumps(sorted_answers)}:{feedback or ''}:{company_part}"
+    raw = (
+        f"{department_name}:{template_name}:{template_id}:"
+        f"{json.dumps(sorted_answers)}:{feedback or ''}:{company_part}"
+    )
     return hashlib.md5(raw.encode()).hexdigest()
 
 
@@ -303,34 +64,34 @@ ARCHETYPE_SIGNALS = {
 }
 
 ARCHETYPE_TONE = {
-    "LETTER": "professional, warm and welcoming — direct address to recipient",
+    "LETTER":   "professional, warm and welcoming — direct address to recipient",
     "CONTRACT": "precise and formal — unambiguous legal language, every clause intentional",
-    "POLICY": "formal and structured — policy-driven, must/shall for obligations",
-    "REPORT": "analytical and evidence-based — findings-first, data-driven",
-    "PROCESS": "procedural and clear — step-based, action-oriented, role ownership",
-    "PLAN": "strategic and forward-looking — goal-oriented, milestone-driven"
+    "POLICY":   "formal and structured — policy-driven, must/shall for obligations",
+    "REPORT":   "analytical and evidence-based — findings-first, data-driven",
+    "PROCESS":  "procedural and clear — step-based, action-oriented, role ownership",
+    "PLAN":     "strategic and forward-looking — goal-oriented, milestone-driven"
 }
 
 ARCHETYPE_FORMAT_HINT = {
-    "LETTER": "Letterhead at top. Direct address. Compensation in table. Formal closing with signatory block.",
-    "CONTRACT": "Numbered clauses (1., 1.1, 1.2). Definitions section. Obligations clear. Dual signature blocks.",
-    "POLICY": "Numbered policy statements. Must/shall for mandatory. Should/may for recommended. Approval block.",
-    "REPORT": "Executive summary first. Findings structured. Risk matrix if applicable. Recommendations. Sign-off.",
-    "PROCESS": "Numbered sequential steps. Role per step. Decision points. Escalation path. Approval block.",
-    "PLAN": "Objective first. Milestones and owners. KPIs. Risk factors. Approval block."
+    "LETTER":   "Letterhead at top. Direct address to named recipient. Compensation in table. Formal closing with signatory block.",
+    "CONTRACT": "Numbered clauses (1., 1.1, 1.2). Definitions section. Obligations explicit. Dual signature blocks.",
+    "POLICY":   "Numbered policy statements. Must/shall for mandatory. Should/may for recommended. Approval block.",
+    "REPORT":   "Executive summary first. Findings structured. Risk matrix if applicable. Recommendations. Sign-off.",
+    "PROCESS":  "Numbered sequential steps. Role per step. Decision points. Escalation path. Approval block.",
+    "PLAN":     "Objective first. Milestones and owners. KPIs. Risk factors. Approval block."
 }
 
 DEPARTMENT_TONE = {
-    "human resources": "formal yet warm — clear, empathetic, professional",
-    "legal": "precise and formal — strict, unambiguous, clause-based",
-    "finance and accounting": "accurate and structured — number-driven, factual",
-    "engineering": "technical and precise — structured, engineer audience",
-    "it operations": "procedural and clear — action-oriented, step-based",
-    "security and compliance": "formal and risk-aware — authoritative, compliance-focused",
-    "customer success": "professional and client-friendly — solution-focused",
-    "marketing": "strategic and engaging — audience-aware, persuasive",
-    "product management": "strategic and cross-functional — business-technical balance",
-    "quality assurance": "methodical and precise — evidence-based, process-driven"
+    "human resources":          "formal yet warm — clear, empathetic, professional",
+    "legal":                    "precise and formal — strict, unambiguous, clause-based",
+    "finance and accounting":   "accurate and structured — number-driven, factual",
+    "engineering":              "technical and precise — structured, engineer audience",
+    "it operations":            "procedural and clear — action-oriented, step-based",
+    "security and compliance":  "formal and risk-aware — authoritative, compliance-focused",
+    "customer success":         "professional and client-friendly — solution-focused",
+    "marketing":                "strategic and engaging — audience-aware, persuasive",
+    "product management":       "strategic and cross-functional — business-technical balance",
+    "quality assurance":        "methodical and precise — evidence-based, process-driven"
 }
 
 
@@ -390,14 +151,14 @@ SECTION_ROLE_MAP = {
 }
 
 SECTION_DEPTH = {
-    "HEADER": "concise — exact values only, 50-150 words",
-    "OPENER": "clear and purposeful — 150-300 words",
-    "STRUCTURAL": "precise definitions — 100-200 words per item",
-    "OBLIGATION": "detailed and explicit — 300-600 words, numbered sub-points",
-    "EVIDENCE": "data-driven and specific — 300-500 words, use table if applicable",
-    "BODY": "detailed and substantial — 400-800 words",
-    "CLOSURE": "actionable — 150-300 words with specific next steps",
-    "SIGN_OFF": "formal block only — names, designations, date lines, 30-80 words"
+    "HEADER":     "concise — exact values only, 50-150 words",
+    "OPENER":     "clear and purposeful — 180-350 words, 3-4 full paragraphs",
+    "STRUCTURAL": "precise definitions — 100-200 words per item, minimum 4 items",
+    "OBLIGATION": "detailed and explicit — 300-650 words, numbered sub-points with must/shall",
+    "EVIDENCE":   "data-driven and specific — 250-500 words, use table if applicable",
+    "BODY":       "detailed and substantial — 300-800 words, full paragraphs",
+    "CLOSURE":    "actionable — 150-350 words with specific next steps, owner, timeline",
+    "SIGN_OFF":   "formal block only — names, designations, date lines, 40-100 words"
 }
 
 TABLE_SECTION_SIGNALS = [
@@ -422,16 +183,18 @@ def _section_needs_table(section_name: str) -> bool:
     return any(s in name for s in TABLE_SECTION_SIGNALS)
 
 
-def _role_to_content_type(role: str) -> str:
+def _role_to_content_type(role: str, section_name: str = "") -> str:
+    if _section_needs_table(section_name):
+        return "table"
     return {
-        "HEADER": "text",
-        "OPENER": "text",
+        "HEADER":     "text",
+        "OPENER":     "text",
         "STRUCTURAL": "list",
         "OBLIGATION": "text",
-        "EVIDENCE": "table",
-        "BODY": "text",
-        "CLOSURE": "list",
-        "SIGN_OFF": "text"
+        "EVIDENCE":   "table",
+        "BODY":       "text",
+        "CLOSURE":    "list",
+        "SIGN_OFF":   "text"
     }.get(role, "text")
 
 
@@ -440,7 +203,7 @@ def _build_section_intelligence(sections: list) -> str:
     for i, section in enumerate(sections, 1):
         role = _classify_section_role(section.section_name)
         depth = SECTION_DEPTH.get(role, "detailed and professional")
-        table_hint = " [USE TABLE FORMAT]" if _section_needs_table(section.section_name) else ""
+        table_hint = " [MUST USE TABLE FORMAT WITH REAL DATA ROWS]" if _section_needs_table(section.section_name) else ""
         lines.append(
             f"{i}. {section.section_name}{table_hint}\n"
             f"   Role: {role} | Depth: {depth}"
@@ -448,74 +211,100 @@ def _build_section_intelligence(sections: list) -> str:
     return "\n".join(lines)
 
 
+def _format_answers_for_prompt(answers: dict) -> str:
+    """
+    Format answers for injection into prompts.
+    Shows ALL keys, marks blanks as 'Not Provided' explicitly.
+    """
+    if not answers:
+        return "  No specific details provided — use professional defaults."
+    lines = []
+    for k, v in answers.items():
+        val = str(v).strip() if v and str(v).strip() else "Not Provided"
+        lines.append(f"  {k}: {val}")
+    return "\n".join(lines)
+
+
 # ═══════════════════════════════════════════════════════
 # SYSTEM PROMPTS
 # ═══════════════════════════════════════════════════════
 DOCUMENT_SYSTEM_PROMPT = """You are DocForge, an advanced document generation engine for B2B SaaS businesses.
-Generate premium-quality, comprehensive, polished business documents executive-ready for PDF/DOCX conversion.
-
-CORE BEHAVIOR:
-- Adapt tone, depth and structure based on document type and department
-- HR documents: formal, warm, detailed
-- Legal documents: strict, unambiguous, clause-based
-- Finance documents: accurate, number-driven, structured tables
-- Reports: analytical, evidence-based, findings-first
-- Technical: precise, structured, engineer audience
-- Plans/strategies: strategic, milestone-driven, goal-oriented
-
-SECTION INTELLIGENCE:
-- HEADER: concise, exact values, no elaboration
-- BODY/OBLIGATION: detailed paragraphs, minimum 2-3 per section
-- FINANCIAL sections: proper table with columns and data rows — NEVER use | pipe characters
-- PROCESS sections: numbered steps with role ownership
-- SIGN_OFF: formal block, names and designations only
-- Never repeat content across sections
-
-CONTENT RULES:
-- Use ALL information provided in answers — never ignore provided values
-- For table sections: generate actual data using provided values — never leave cells empty
-- If a value is not provided: write "Not Provided" — never use [brackets] as placeholders
-- Dates: use actual date format like "14 April 2026" — never write [DATE]
-- Names: use exact names provided — never write [Name] or [Insert Name]
-- Financial values: use exact figures provided — never write [Amount] or [Price]
-
-FORMAT RULES — STRICTLY ENFORCED:
-- DO NOT use ##, **, --, ***, or any markdown symbols anywhere
-- Section headings are plain text only
-- No pipe | characters for tables — use proper structured format
-- No special characters, no smart quotes, no decorative formatting
-- Content must be readable for both PDF and DOCX
-
-OUTPUT: Start directly with document content. End with sign-off block."""
-
-
-STRUCTURED_SYSTEM_PROMPT = """You are Doc-Forge, a document generation engine for B2B SaaS companies.
-Output ONLY structured JSON — never plain text or markdown.
+Generate premium-quality, comprehensive, polished business documents — executive-ready for PDF/DOCX conversion.
 Today's date: {today}
 
-SECTION RULES:
-- HEADER: content_type "text", concise exact values, left alignment
-- BODY/OBLIGATION: content_type "text", 2-3 substantial paragraphs, justify alignment
-- FINANCIAL/COMPENSATION/INVOICE/PAYMENT: content_type "table", structured rows with actual data
-- STEPS/LIST sections: content_type "list", numbered items
-- SIGN_OFF: content_type "text", center alignment, formal block
+ABSOLUTE RULES — NEVER VIOLATE:
+1. NEVER use [brackets] as placeholders — no [DATE], [NAME], [Company Name], [Amount], [Insert anything]
+2. Use exact values provided in the variable data
+3. If a value is genuinely not provided, write "Not Provided" — never a bracket
+4. Use today's date {today} for any date field that is not explicitly provided
+5. No ## no ** no -- no markdown symbols anywhere in content
+6. No pipe | characters in text content (tables are handled separately)
+7. UTF-8 safe characters only
 
-CRITICAL — PLACEHOLDER RULE:
-- NEVER use [brackets] for anything — no [DATE], [NAME], [Amount], [Insert anything]
-- Use actual values from provided data
-- If date missing: use today {today}
-- If name missing: write "Not Provided"
-- If amount missing: write "As agreed"
-- Table cells must have actual content — never empty brackets
+TONE BY DOCUMENT TYPE:
+- HR documents: formal, warm, detailed — direct address to named recipient
+- Legal/Contract: strict, unambiguous, clause-based — numbered sub-clauses
+- Finance: accurate, number-driven, all values from provided data
+- Reports: analytical, evidence-based, findings-first
+- Technical: precise, structured, engineer audience
+- Plans/Strategies: strategic, milestone-driven, goal-oriented
+
+SECTION WRITING RULES:
+- HEADER: exact values only — date, names, reference number, company, designation
+- OPENER/INTRODUCTION: 3-4 full paragraphs — purpose, context, scope, importance
+- BODY/OBLIGATION sections: minimum 300 words — 3+ detailed paragraphs
+- FINANCIAL sections (compensation, salary, invoice, pricing): ALWAYS a table with real column headers and real data rows
+- PROCESS sections: numbered steps with role and action
+- CLOSURE/RECOMMENDATIONS: specific actions with owner and timeline
+- SIGN_OFF: formal block with actual names and designation — compact
+
+CONTENT QUALITY RULES:
+- Use ALL provided variable data — do not ignore any supplied value
+- Every section must feel complete and professionally written
+- No filler phrases: "as mentioned above", "as previously stated", "it is important to note"
+- No redundancy across sections
+- Financial tables must have real monetary values, not "As agreed" unless value is genuinely absent
+
+OUTPUT: Start directly with document content. No preamble. End with sign-off block."""
+
+
+STRUCTURED_SYSTEM_PROMPT = """You are DocForge, a structured document generation engine for B2B SaaS companies.
+Output ONLY valid JSON — never plain text or markdown outside JSON values.
+Today's date: {today}
+
+ABSOLUTE PLACEHOLDER RULE — THIS IS CRITICAL:
+- NEVER use [brackets] anywhere — no [DATE], [NAME], [Company Name], [Amount], [Insert X], [Add X]
+- Use the exact values from the variable data provided
+- For any date field: use {today} if no specific date was given
+- For any missing name: write "Not Provided"
+- For any missing amount: write "As per agreement" — NEVER [Amount] or [Price]
+- Table cells MUST have real content — never empty or bracket placeholders
+
+SECTION TYPE RULES:
+- HEADER sections: content_type "text", left alignment, compact, exact values
+- OPENER/INTRODUCTION/BACKGROUND: content_type "text", justify alignment, 180-350 words, 3-4 paragraphs
+- BODY/OBLIGATION/RESPONSIBILITIES: content_type "text", justify alignment, 300-700 words
+- FINANCIAL/COMPENSATION/SALARY/INVOICE/PAYMENT/PRICING: content_type "table", real header row + real data rows
+- DEFINITIONS/STEPS/RECOMMENDATIONS: content_type "list", minimum 4 items
+- SIGN_OFF/APPROVAL/SIGNATURE: content_type "text", center alignment, 40-100 words
+
+TABLE FORMAT — REQUIRED STRUCTURE:
+"content": [
+  {{"cells": ["Column Header 1", "Column Header 2", "Column Header 3"]}},
+  {{"cells": ["Actual Data Value", "Actual Data Value", "Actual Data Value"]}},
+  {{"cells": ["Actual Data Value", "Actual Data Value", "Actual Data Value"]}}
+]
+- Minimum 1 header row + 1 data row (2 rows total)
+- All cell values must be real, meaningful content
+- No pipe | characters in cell values
 
 STRICT OUTPUT RULES:
-1. Use ONLY information provided — no invention
-2. No ##, no **, no markdown in any content value
-3. No pipe | characters anywhere in content
-4. UTF-8 safe characters only — no smart quotes
-5. Every required section must appear in output
-6. Return valid JSON only — nothing else
-7. Tables must have real header row + real data rows"""
+1. Return ONLY valid JSON — nothing before or after the JSON object
+2. No ##, no **, no markdown formatting in any content string
+3. Every required section must be present in the sections array
+4. Sections must be in the exact order specified in the prompt
+5. Every content string must be substantially written — no stub content
+6. word_count field must be an integer (approximate is fine)"""
 
 
 # ═══════════════════════════════════════════════════════
@@ -539,7 +328,7 @@ def clean_output(text: str) -> str:
 
 
 # ═══════════════════════════════════════════════════════
-# PROMPT BUILDER
+# PROMPT BUILDER — plain text generation
 # ═══════════════════════════════════════════════════════
 def build_prompt(
     db: Session,
@@ -550,7 +339,6 @@ def build_prompt(
     answers: Dict[str, str],
     company: Optional[Dict] = None
 ) -> str:
-
     sections = crud.get_sections_by_template(db, template_id)
     section_count = len(sections)
     archetype = _detect_archetype(template_name)
@@ -559,7 +347,7 @@ def build_prompt(
 
     archetype_tone = ARCHETYPE_TONE.get(archetype, "professional and formal")
     dept_tone = DEPARTMENT_TONE.get(department_name.lower(), "professional and formal")
-    tone = f"{archetype_tone}; {dept_tone}"
+    effective_tone = f"{archetype_tone}; {dept_tone}"
     format_hint = ARCHETYPE_FORMAT_HINT.get(archetype, "")
     section_intelligence = _build_section_intelligence(sections)
 
@@ -569,22 +357,24 @@ def build_prompt(
             f"Industry: {company.get('industry', 'B2B SaaS')}\n"
             f"Size: {company.get('size', 'Not specified')}\n"
             f"Location: {company.get('location', 'India')}\n"
-            f"Tone Preference: {company.get('tone', tone)}"
+            f"Tone Preference: {company.get('tone', effective_tone)}"
         )
+        final_tone = company.get("tone", effective_tone)
     else:
-        company_context = f"Company: India-based B2B SaaS\nTone: {tone}"
+        company_context = f"Company: India-based B2B SaaS\nTone: {effective_tone}"
+        final_tone = effective_tone
 
-    answers_formatted = "\n".join([
-        f"  {k}: {v}"
-        for k, v in answers.items()
-        if v and str(v).strip()
-    ]) or "  No specific details provided — use professional defaults."
+    answers_formatted = _format_answers_for_prompt(answers)
 
     length_note = (
-        "Comprehensive document — full detailed content per section. "
-        "Critical sections minimum 400 words. Supporting sections 150-300 words."
+        "COMPREHENSIVE DOCUMENT: Every section must be fully written.\n"
+        "- Critical sections (BODY, OBLIGATION, EVIDENCE): minimum 400 words each\n"
+        "- Supporting sections (OPENER, CLOSURE): minimum 200 words each\n"
+        "- HEADER and SIGN_OFF: compact and factual"
         if is_long else
-        "Precise document — complete and professional per section."
+        "PRECISE DOCUMENT: Every section must be complete and professional.\n"
+        "- Content sections: minimum 250 words each\n"
+        "- HEADER and SIGN_OFF: compact and factual"
     )
 
     prompt = f"""Today's date: {today}
@@ -595,24 +385,27 @@ Department: {department_name}
 Document Type: {template_name}
 Archetype: {archetype}
 Purpose: {template_description}
-Tone: {tone}
-Format: {format_hint}
+Tone: {final_tone}
+Format Guidelines: {format_hint}
 
-Required Sections ({section_count} total — ALL mandatory):
+Required Sections ({section_count} total — ALL mandatory, in this order):
 {section_intelligence}
 
-ANSWERS PROVIDED — USE ALL OF THESE VALUES:
+VARIABLE DATA — USE ALL OF THESE VALUES IN THE DOCUMENT:
 {answers_formatted}
 
 CRITICAL RULES:
-- Use every answer value provided above — do not ignore any
-- Never use [brackets] as placeholders — use actual values or "Not Provided"
-- Today's date is {today} — use this wherever date is needed
-- For table sections: build proper table with actual data from answers above
-- No ##, no **, no markdown — clean text only
+1. Use every provided value above — do not ignore any supplied data
+2. NEVER use [brackets] as placeholders — use real values or write "Not Provided"
+3. Today's date is {today} — use this wherever date is needed
+4. For table sections: build proper table using actual values from variable data
+5. No ##, no **, no markdown — clean plain text only . 
+no Approval section should be unfilled or with placeholder text like "Approver Name", "Date", "Signature" etc. if the relevant data is not provided, fill according to document context  dont write "Not Provided" strictly.
+6. Every section must be substantively written — no stub content
 
 {length_note}
-Cover all {section_count} sections. Start with document title. End with sign-off block."""
+
+Generate all {section_count} sections. Start immediately with document content. End with sign-off block."""
 
     return prompt
 
@@ -640,12 +433,15 @@ def build_regenerate_prompt(
         company=company
     )
     if feedback:
-        base += f"\n\nUser Feedback:\n{feedback}\n\nApply this. Keep all sections. Maintain tone."
+        base += (
+            f"\n\nUSER FEEDBACK TO APPLY:\n{feedback}\n\n"
+            "Apply the feedback above. Keep all sections. Maintain professional tone."
+        )
     return base
 
 
 # ═══════════════════════════════════════════════════════
-# STRUCTURED PROMPT — fixed, no stray ] at end
+# STRUCTURED PROMPT — for JSON generation
 # ═══════════════════════════════════════════════════════
 def build_structured_prompt(
     db,
@@ -661,51 +457,88 @@ def build_structured_prompt(
     today = date.today().strftime("%d %B %Y")
     sections = crud.get_sections_by_template(db, template_id)
     archetype = _detect_archetype(template_name)
-    tone = DEPARTMENT_TONE.get(department_name.lower(), "professional and formal")
-    company_name = company.get("name", "India-based B2B SaaS") if company else "India-based B2B SaaS"
+    dept_tone = DEPARTMENT_TONE.get(department_name.lower(), "professional and formal")
+    arch_tone = ARCHETYPE_TONE.get(archetype, "professional and formal")
 
+    company_name = company.get("name", "Not specified") if company else "Not specified"
+    final_tone   = (company.get("tone", f"{arch_tone}; {dept_tone}") if company
+                    else f"{arch_tone}; {dept_tone}")
+
+    # Build per-section schema with depth hints
     sections_schema = []
     for i, section in enumerate(sections, 1):
         role = _classify_section_role(section.section_name)
-        content_type = _role_to_content_type(role)
-        table_flag = " [MUST_BE_TABLE — use actual data from answers]" if _section_needs_table(section.section_name) else ""
+        content_type = _role_to_content_type(role, section.section_name)
+        depth = SECTION_DEPTH.get(role, "detailed and professional")
+
+        if _section_needs_table(section.section_name):
+            extra = (
+                " [TABLE REQUIRED — build real rows from variable data above. "
+                "Minimum: 1 header row + 2 data rows]"
+            )
+        else:
+            extra = ""
+
         sections_schema.append(
-            f'{i}. "{section.section_name}" | role:{role} | type:{content_type}{table_flag}'
+            f'{i}. "{section.section_name}"\n'
+            f'   role: {role} | content_type: {content_type} | depth: {depth}{extra}'
         )
     sections_list = "\n".join(sections_schema)
 
-    # Format answers strictly — show all values
-    answers_lines = []
-    for k, v in answers.items():
-        val = v if v and str(v).strip() else "Not Provided"
-        answers_lines.append(f"  {k}: {val}")
-    answers_formatted = "\n".join(answers_lines) if answers_lines else "  No details provided."
-
+    answers_formatted = _format_answers_for_prompt(answers)
     generation_id = str(uuid.uuid4())
 
-    return f"""Generate {template_name} for {company_name}.
+    # Build a concrete example table if any table sections exist
+    table_sections = [s for s in sections if _section_needs_table(s.section_name)]
+    table_example_note = ""
+    if table_sections:
+        table_example_note = f"""
+TABLE CONSTRUCTION EXAMPLE for '{table_sections[0].section_name}':
+If variable data contains: salary = 50000, hra = 20000, ctc = 840000
+Then build:
+"content": [
+  {{"cells": ["Component", "Monthly (INR)", "Annual (INR)"]}},
+  {{"cells": ["Basic Salary", "50,000", "6,00,000"]}},
+  {{"cells": ["House Rent Allowance", "20,000", "2,40,000"]}},
+  {{"cells": ["Total CTC", "--", "8,40,000"]}}
+]
+Apply the same principle using the actual values from the variable data for your document.
+"""
 
-Today's date: {today}
-Company: {company_name}
-Department: {department_name}
-Archetype: {archetype}
-Tone: {tone}
-Purpose: {template_description}
+    return f"""Generate a complete {template_name} document for {company_name}.
 
-Required sections ({len(sections)} total — ALL mandatory in order):
+DOCUMENT CONTEXT:
+- Today's Date: {today}
+- Company: {company_name}
+- Department: {department_name}
+- Document Type: {template_name}
+- Archetype: {archetype}
+- Tone: {final_tone}
+- Purpose: {template_description}
+
+REQUIRED SECTIONS — ALL {len(sections)} MUST BE PRESENT, IN THIS EXACT ORDER:
 {sections_list}
 
-Variable data — USE ALL THESE VALUES (critical — do not ignore):
+VARIABLE DATA — EMBED ALL APPLICABLE VALUES IN THE DOCUMENT:
 {answers_formatted}
 
-CRITICAL RULES:
-1. NEVER use [brackets] as placeholders — use actual values above or "Not Provided"
-2. For table sections: build real table using actual data from answers — no empty bracket cells
-3. Today's date is {today} — use this for any date field
-4. Every section must have substantial content — no "Content to be provided"
-5. Financial/invoice tables must have real rows with actual values from answers
+PLACEHOLDER RULE (CRITICAL — READ CAREFULLY):
+- NEVER write [brackets] anywhere in the JSON output
+- Use the exact values from variable data above
+- If today's date is needed: use {today}
+- If a name is missing: write "Not Provided" (not [Name])
+- If an amount is missing: write "As per agreement" (not [Amount])
+- Table cells must ALWAYS have real text — never empty or brackets
+{table_example_note}
 
-Return ONLY this JSON (no text before or after, no markdown):
+CONTENT DEPTH REQUIREMENTS:
+- OPENER / INTRODUCTION / BACKGROUND: minimum 180 words, 3-4 full paragraphs
+- BODY / OBLIGATION / RESPONSIBILITIES: minimum 300 words, detailed
+- EVIDENCE / ASSESSMENT: table with real data + minimum 150 words of text
+- HEADER: compact, 50-150 words, exact values only
+- SIGN_OFF: formal block, 40-100 words max
+
+Return ONLY this JSON structure (no text before or after, no markdown):
 {{
   "document_metadata": {{
     "department": "{department_name}",
@@ -717,11 +550,11 @@ Return ONLY this JSON (no text before or after, no markdown):
   "sections": [
     {{
       "id": "section_1",
-      "heading": "exact section name — no symbols",
-      "content_type": "text or table or list",
-      "content": "string for text, array of cell objects for table, array of strings for list",
+      "heading": "Exact Section Name",
+      "content_type": "text",
+      "content": "Fully written content string here — no placeholders, no brackets",
       "styling": {{
-        "alignment": "left or center or justify",
+        "alignment": "justify",
         "font_weight": "normal",
         "page_break_after": false
       }},
@@ -731,22 +564,25 @@ Return ONLY this JSON (no text before or after, no markdown):
   "validation_status": "verified"
 }}
 
-Table format (use for financial/invoice/pricing sections):
+For list sections, content is an array of strings:
+"content": ["Item one fully written", "Item two fully written", "Item three fully written"]
+
+For table sections, content is an array of row objects:
 "content": [
-  {{"cells": ["Description", "Quantity", "Unit Price", "Total"]}},
-  {{"cells": ["[actual item from answers]", "[actual qty]", "[actual price]", "[actual total]"]}}
+  {{"cells": ["Header 1", "Header 2", "Header 3"]}},
+  {{"cells": ["Real Value 1", "Real Value 2", "Real Value 3"]}}
 ]
-CRITICAL CONTENT DEPTH RULES:
-- OPENER/BACKGROUND sections: minimum 150 words — full paragraphs
-- BODY/OBLIGATION sections: minimum 250-900 words — detailed content
-- EVIDENCE sections: use table with real data rows from answers
-- HEADER: compact, exact values only (name, date, ref no)
-- SIGN_OFF: formal block, 60-80 words max
-- Every section must feel complete — no filler phrases like "as mentioned above"""
+
+FINAL CHECK BEFORE OUTPUTTING:
+- Are all {len(sections)} sections present? 
+- Do all table sections have header row + at least 1 data row with real values?
+- Are there zero [bracket] placeholders anywhere?
+- Is the content substantive and professionally written?
+If any answer is no, fix it before outputting."""
 
 
 # ═══════════════════════════════════════════════════════
-# MAIN GENERATE
+# MAIN GENERATE (plain text — for preview)
 # ═══════════════════════════════════════════════════════
 def generate_document(
     db: Session,
@@ -758,7 +594,6 @@ def generate_document(
     feedback: Optional[str] = None,
     company: Optional[Dict] = None
 ) -> str:
-
     cache_key = _make_cache_key(
         department_name, template_name,
         template_id, answers, feedback, company
@@ -766,6 +601,8 @@ def generate_document(
 
     if cache_key in _document_cache:
         return _document_cache[cache_key]
+
+    today = date.today().strftime("%d %B %Y")
 
     prompt = build_regenerate_prompt(
         db=db,
@@ -778,9 +615,11 @@ def generate_document(
         company=company
     )
 
+    system = DOCUMENT_SYSTEM_PROMPT.replace("{today}", today)
+
     response = llm_service.generate_with_llm(
         prompt,
-        system_prompt=DOCUMENT_SYSTEM_PROMPT
+        system_prompt=system
     )
 
     cleaned = clean_output(response)
