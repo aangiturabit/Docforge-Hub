@@ -189,7 +189,7 @@ def _replace_placeholders(text: str, answers: dict = None) -> str:
     text = re.sub(r'\[TBD\]|\bTBD\b', 'To be confirmed', text)
     text = re.sub(r'\[INSERT[^\]]*\]', 'Not Provided', text)
     text = re.sub(r'\[ADD[^\]]*\]', '', text)
-    text = re.sub(r'\[.*?\]', 'Not Provided', text)  # catch-all
+    text = re.sub(r'\[.*?\]', 'Not Provided', text)  
     return text
 
 
@@ -251,15 +251,7 @@ def generate_structured_document(
 
 
 def _clean_structured_json(raw, template_id: int, db, answers: dict = None) -> dict:
-    """
-    Post-process structured JSON:
-    1. Normalize to dict
-    2. Clean all text — no markdown
-    3. Replace ALL placeholders using answers context
-    4. Ensure all required sections present
-    5. Validate / fix table structure
-    6. Enforce minimum word counts by role
-    """
+  
     raw = _normalize_structured(raw)
 
     sections = crud.get_sections_by_template(db, template_id)
@@ -691,7 +683,7 @@ def _auto_fix_structured(structured: dict, answers: dict, sections_db: list, db)
     """
     After generation, run quick fixes:
     - Replace any remaining placeholders using answer values
-    - Ensure every table section has at least a header + 1 data row
+    - Ensure every table section has at least a header +  data rows
     - Remove stub-content sections
     """
     structured = _normalize_structured(structured)

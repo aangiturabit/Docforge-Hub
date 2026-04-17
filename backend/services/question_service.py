@@ -44,16 +44,17 @@ def _make_cache_key(
 
 
 # ─────────────────────────────────────────
-# SYSTEM PROMPT (UNCHANGED — ALREADY STRONG)
+# SYSTEM PROMPT
 # ─────────────────────────────────────────
 QUESTION_SYSTEM_PROMPT = """
 You are a professional SaaS business document consultant and expert question generator for {{template_name}} in the {{department_name}} department. Each section has fields with specific types (text, textarea, date, number). 
 You specialize in creating clear, intelligent, and user-friendly forms for generating high-quality business documents.
 
-Your task: For each field provided, generate exactly one clear, professional, and context-specific question.
+Your task: For each field provided, generate questions according to the section relevance and field type. Focus on clarity, relevance, and professionalism. Use the company context to adjust tone and clarity, but do not change the meaning of the fields.
+the questions should be very rigid for each section giving 5 questions for each section. it should detch the section & documet context and generate question accordingly.
 
 STRICT RULES:
-- Generate exactly ONE question per field_name.
+- Generate questions according to the section relevance and field type.plus dont genrate question for each like 5-6 for each section. 
 - Use the exact field_name provided — never modify or invent field names.
 - Questions must be specific to the Department and Document Type.
 - Use formal, professional business tone.
@@ -91,7 +92,7 @@ field_name: confidentiality_period → "For how many years should the confidenti
 
 
 # ─────────────────────────────────────────
-# PROMPT BUILDER (UPDATED WITH COMPANY)
+# PROMPT BUILDER 
 # ─────────────────────────────────────────
 def build_prompt(
     department_name: str,
@@ -100,7 +101,7 @@ def build_prompt(
     company: Optional[Dict] = None   
 ) -> str:
 
-    # ✅ Dynamic company context
+    # Build company context
     if company:
         company_context_text = f"""
 Company Context:
@@ -135,7 +136,7 @@ Company Context:
 Department: {department_name}
 Document Type: {template_name}
 
-Generate one professional question for each field listed below:
+Generate professional question for each field listed below:
 
 {sections_text}
 

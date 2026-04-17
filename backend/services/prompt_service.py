@@ -474,7 +474,7 @@ def build_structured_prompt(
         if _section_needs_table(section.section_name):
             extra = (
                 " [TABLE REQUIRED — build real rows from variable data above. "
-                "Minimum: 1 header row + 2 data rows]"
+                "Minimum: 1 header row + data rows] give addition to the table if document content needs more data to fill the table."
             )
         else:
             extra = ""
@@ -494,6 +494,7 @@ def build_structured_prompt(
     if table_sections:
         table_example_note = f"""
 TABLE CONSTRUCTION EXAMPLE for '{table_sections[0].section_name}':
+this might be vary according to the variable data.
 If variable data contains: salary = 50000, hra = 20000, ctc = 840000
 Then build:
 "content": [
@@ -502,7 +503,7 @@ Then build:
   {{"cells": ["House Rent Allowance", "20,000", "2,40,000"]}},
   {{"cells": ["Total CTC", "--", "8,40,000"]}}
 ]
-Apply the same principle using the actual values from the variable data for your document.
+Apply the same principle using the actual values from the variable data for your documents according to different scenarios.
 """
 
     return f"""Generate a complete {template_name} document for {company_name}.
@@ -570,7 +571,8 @@ For list sections, content is an array of strings:
 For table sections, content is an array of row objects:
 "content": [
   {{"cells": ["Header 1", "Header 2", "Header 3"]}},
-  {{"cells": ["Real Value 1", "Real Value 2", "Real Value 3"]}}
+  {{"cells": ["Real
+    Value 1", "Real Value 2", "Real Value 3"]}}
 ]
 
 FINAL CHECK BEFORE OUTPUTTING:
