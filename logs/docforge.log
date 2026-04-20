@@ -1,0 +1,128 @@
+2026-04-20 15:01:45 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 15:01:45 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 15:01:45 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:01:45 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 15:02:05 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=41
+2026-04-20 15:02:05 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Engineering' template='Software Architecture Document'
+2026-04-20 15:02:05 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:02:05 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Software Architecture Document dept=Engineering sections=12
+2026-04-20 15:02:09 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=50
+2026-04-20 15:02:09 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Engineering' template='SLA and Uptime Policy'
+2026-04-20 15:02:09 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:02:09 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=SLA and Uptime Policy dept=Engineering sections=14
+2026-04-20 15:02:17 [INFO    ] docforge.services.document generate_structured_document:155 — generate_structured_document | template='SLA and Uptime Policy' dept='Engineering'
+2026-04-20 15:02:17 [DEBUG   ] docforge.services.prompt build_structured_prompt:432 — build_structured_prompt | template='SLA and Uptime Policy' archetype=POLICY sections=14
+2026-04-20 15:03:50 [INFO    ] docforge.services.document generate_structured_document:155 — generate_structured_document | template='SLA and Uptime Policy' dept='Engineering'
+2026-04-20 15:03:50 [DEBUG   ] docforge.services.prompt build_structured_prompt:432 — build_structured_prompt | template='SLA and Uptime Policy' archetype=POLICY sections=14
+2026-04-20 15:27:47 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 15:27:47 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 15:27:47 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:27:47 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 15:27:55 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=41
+2026-04-20 15:27:55 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Engineering' template='Software Architecture Document'
+2026-04-20 15:27:55 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:27:55 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Software Architecture Document dept=Engineering sections=12
+2026-04-20 15:27:59 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=50
+2026-04-20 15:27:59 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Engineering' template='SLA and Uptime Policy'
+2026-04-20 15:27:59 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:27:59 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=SLA and Uptime Policy dept=Engineering sections=14
+2026-04-20 15:28:03 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=50
+2026-04-20 15:28:03 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Engineering' template='SLA and Uptime Policy'
+2026-04-20 15:28:03 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:28:03 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=SLA and Uptime Policy dept=Engineering sections=14
+2026-04-20 15:28:04 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=50
+2026-04-20 15:28:04 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Engineering' template='SLA and Uptime Policy'
+2026-04-20 15:28:04 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:28:04 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=SLA and Uptime Policy dept=Engineering sections=14
+2026-04-20 15:28:05 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=50
+2026-04-20 15:28:05 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Engineering' template='SLA and Uptime Policy'
+2026-04-20 15:28:05 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:28:05 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=SLA and Uptime Policy dept=Engineering sections=14
+2026-04-20 15:28:09 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=50
+2026-04-20 15:28:09 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Engineering' template='SLA and Uptime Policy'
+2026-04-20 15:28:09 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:28:09 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=SLA and Uptime Policy dept=Engineering sections=14
+2026-04-20 15:28:11 [INFO    ] docforge.services.document generate_structured_document:155 — generate_structured_document | template='SLA and Uptime Policy' dept='Engineering'
+2026-04-20 15:28:11 [DEBUG   ] docforge.services.prompt build_structured_prompt:998 — build_structured_prompt | template='SLA and Uptime Policy' archetype=POLICY sections=14
+2026-04-20 15:28:11 [INFO    ] docforge.services.llm generate_structured_document:210 — generate_structured_document: calling LLM | prompt_len=5811
+2026-04-20 15:29:16 [INFO    ] docforge.services.llm generate_structured_document:233 — generate_structured_document: success | sections=14 elapsed=65.0s
+2026-04-20 15:29:16 [DEBUG   ] docforge.services.document generate_structured_document:180 — LLM raw | sections=14
+2026-04-20 15:29:16 [DEBUG   ] docforge.services.validation run_validation_pipeline:338 — validation_pipeline | valid=False fatal_issues=7
+2026-04-20 15:29:16 [WARNING ] docforge.services.document _silent_regen_bad_sections:332 — silent_regen: 7 sections need regen but cap is 2 — skipping: ['Response Time and Resolution Time Commitments by Severity Level', 'Credit Claim Process and Eligibility Conditions', 'Escalation Path and On-Call Engineering Responsibilities', 'Monitoring Tools and Uptime Measurement Sources', 'Customer Obligations and Fair Use Requirements']
+2026-04-20 15:29:16 [INFO    ] docforge.services.document _silent_regen_bad_sections:338 — silent_regen: regenerating 2 section(s): ['Uptime Commitment and Availability Targets', 'Downtime Definition and Exclusions']
+2026-04-20 15:29:16 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=949
+2026-04-20 15:29:16 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional document writer for turabit solutions. Tone: Professional. No markdown. No bracket placeholders. Today: 20 …
+2026-04-20 15:29:16 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate the 'Uptime Commitment and Availability Targets' section for a SLA and Uptime Policy document.
+
+ROLE: BODY
+INSTRUCTION:
+Write comprehensive, detailed content — minimum 250 words. Expand every point with full explanation, context, and implications. Use all values from the provided answers.…
+2026-04-20 15:29:23 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=2428 elapsed=6.3s
+2026-04-20 15:29:23 [INFO    ] docforge.services.document _silent_regen_bad_sections:350 — silent_regen: done — Uptime Commitment and Availability Targets
+2026-04-20 15:29:23 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=941
+2026-04-20 15:29:23 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional document writer for turabit solutions. Tone: Professional. No markdown. No bracket placeholders. Today: 20 …
+2026-04-20 15:29:23 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate the 'Downtime Definition and Exclusions' section for a SLA and Uptime Policy document.
+
+ROLE: BODY
+INSTRUCTION:
+Write comprehensive, detailed content — minimum 250 words. Expand every point with full explanation, context, and implications. Use all values from the provided answers. Clear p…
+2026-04-20 15:29:32 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=2433 elapsed=9.2s
+2026-04-20 15:29:32 [INFO    ] docforge.services.document _silent_regen_bad_sections:350 — silent_regen: done — Downtime Definition and Exclusions
+2026-04-20 15:29:32 [INFO    ] docforge.services.document generate_structured_document:193 — generate_structured_document complete | sections=14
+2026-04-20 15:29:32 [INFO    ] docforge.services.document save_document:591 — save_document | session=7270534d-c2cf-4dea-a8d3-dffd267258c5 template=50
+2026-04-20 15:29:59 [INFO    ] docforge.services.document regenerate_section:442 — regenerate_section | doc_id=91 section='Purpose and Scope' feedback=False
+2026-04-20 15:29:59 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=2574
+2026-04-20 15:29:59 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Expert professional document writer for Engineering. Tone: Professional. No markdown. No bracket placeholders. Today: 20…
+2026-04-20 15:29:59 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate 'Purpose and Scope' section for a SLA and Uptime Policy document.
+
+DOCUMENT TYPE: SLA and Uptime Policy
+DEPARTMENT: Engineering
+TODAY: 20 April 2026
+
+SECTION ROLE: OPENER
+DEPTH INSTRUCTION:
+Write 3-4 full paragraphs (minimum 180 words). Cover: purpose of the document, background context, …
+2026-04-20 15:30:05 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=2304 elapsed=6.5s
+2026-04-20 15:30:05 [INFO    ] docforge.services.document regenerate_section:555 — regenerate_section complete | doc_id=91 section='Purpose and Scope'
+2026-04-20 15:38:20 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 15:38:20 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 15:38:20 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:38:20 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 15:46:50 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=21
+2026-04-20 15:46:50 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Finance and Accounting' template='Financial Policy'
+2026-04-20 15:46:50 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 15:46:50 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Financial Policy dept=Finance and Accounting sections=12
+2026-04-20 15:47:11 [INFO    ] docforge.services.document generate_structured_document:155 — generate_structured_document | template='Financial Policy' dept='Finance and Accounting'
+2026-04-20 15:47:11 [DEBUG   ] docforge.services.prompt build_structured_prompt:998 — build_structured_prompt | template='Financial Policy' archetype=POLICY sections=12
+2026-04-20 15:47:11 [INFO    ] docforge.services.llm generate_structured_document:210 — generate_structured_document: calling LLM | prompt_len=5092
+2026-04-20 15:48:12 [INFO    ] docforge.services.llm generate_structured_document:233 — generate_structured_document: success | sections=12 elapsed=60.9s
+2026-04-20 15:48:12 [DEBUG   ] docforge.services.document generate_structured_document:180 — LLM raw | sections=12
+2026-04-20 15:48:12 [DEBUG   ] docforge.services.validation run_validation_pipeline:338 — validation_pipeline | valid=False fatal_issues=6
+2026-04-20 15:48:12 [WARNING ] docforge.services.document _silent_regen_bad_sections:332 — silent_regen: 6 sections need regen but cap is 2 — skipping: ['Revenue Recognition Policy', 'Financial Reporting Requirements', 'Compliance and Regulatory Requirements', 'Policy Violations']
+2026-04-20 15:48:12 [INFO    ] docforge.services.document _silent_regen_bad_sections:338 — silent_regen: regenerating 2 section(s): ['Scope', 'Expense Authorization Rules']
+2026-04-20 15:48:12 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=791
+2026-04-20 15:48:12 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional document writer for Finance and Accounting. Tone: Professional. No markdown. No bracket placeholders. Today…
+2026-04-20 15:48:12 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate the 'Scope' section for a Financial Policy document.
+
+ROLE: OPENER
+INSTRUCTION:
+Write 3-4 full paragraphs (minimum 180 words). Cover: purpose of the document, background context, scope, and why this document matters. Tone must match document type. No bullet points. No markdown.
+
+VARIABLE …
+2026-04-20 15:48:20 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=2093 elapsed=8.0s
+2026-04-20 15:48:20 [INFO    ] docforge.services.document _silent_regen_bad_sections:350 — silent_regen: done — Scope
+2026-04-20 15:48:20 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=833
+2026-04-20 15:48:20 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional document writer for Finance and Accounting. Tone: Professional. No markdown. No bracket placeholders. Today…
+2026-04-20 15:48:20 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate the 'Expense Authorization Rules' section for a Financial Policy document.
+
+ROLE: OBLIGATION
+INSTRUCTION:
+Write detailed obligations using formal language (must, shall, is responsible for). Minimum 250 words. Numbered points — each is a complete, enforceable statement. Cover all parties. …
+2026-04-20 15:48:28 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=2563 elapsed=8.5s
+2026-04-20 15:48:28 [INFO    ] docforge.services.document _silent_regen_bad_sections:350 — silent_regen: done — Expense Authorization Rules
+2026-04-20 15:48:28 [INFO    ] docforge.services.document generate_structured_document:193 — generate_structured_document complete | sections=12
+2026-04-20 15:48:28 [INFO    ] docforge.services.document save_document:591 — save_document | session=20443f37-ca03-46cd-a89c-dcb53bc337c3 template=21
+2026-04-20 16:15:11 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=12
+2026-04-20 16:15:11 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Security and Compliance' template='Cybersecurity Incident Response Plan'
+2026-04-20 16:15:11 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:15:11 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Cybersecurity Incident Response Plan dept=Security and Compliance sections=12

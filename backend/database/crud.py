@@ -196,10 +196,7 @@ def save_generated_document(
     db.refresh(doc)
     return doc
 
-def get_documents_by_session(db: Session, session_id: UUID):
-    return db.query(GeneratedDocument).filter(
-        GeneratedDocument.session_id == session_id
-    ).order_by(GeneratedDocument.created_at.desc()).all()
+
 
 def get_document_by_id(db: Session, document_id: int):
     return db.query(GeneratedDocument).filter(

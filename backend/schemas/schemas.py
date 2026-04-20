@@ -69,22 +69,22 @@ class GenerateQuestionsRequest(BaseModel):
     document_type_id: int
 
 
+
 class GenerateQuestionsResponse(BaseModel):
-    session_id: UUID
+    session_id: Optional[UUID] = None    
     department: str
     template: str
     sections: List[SectionWithFieldsResponse]
-
 
 # ─────────────────────────────────────────
 # GENERATE DOCUMENT SCHEMAS
 # ─────────────────────────────────────────
 
 class GenerateDocumentRequest(BaseModel):
-    session_id: UUID
     department_id: int
     template_id: int
     answers: Dict[str, str]
+    company: Optional[Dict[str, str]] = None
 
 class GeneratedDocumentResponse(BaseModel):
     document_id: int
