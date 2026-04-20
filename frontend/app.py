@@ -6,7 +6,9 @@ from datetime import datetime
 import requests
 import streamlit as st
 
-API_BASE = "http://127.0.0.1:8000/api"
+# API_BASE = "http://127.0.0.1:8000/api"
+
+API_BASE = "http://localhost:8000/api"
 
 st.set_page_config(
     page_title="DocForge Hub",
