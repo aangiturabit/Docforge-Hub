@@ -126,3 +126,139 @@ Write detailed obligations using formal language (must, shall, is responsible fo
 2026-04-20 16:15:11 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Security and Compliance' template='Cybersecurity Incident Response Plan'
 2026-04-20 16:15:11 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
 2026-04-20 16:15:11 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Cybersecurity Incident Response Plan dept=Security and Compliance sections=12
+2026-04-20 16:37:55 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 16:37:55 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 16:37:55 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:37:55 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 16:38:21 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=61
+2026-04-20 16:38:21 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Marketing' template='Marketing Strategy Document'
+2026-04-20 16:38:21 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:38:21 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Marketing Strategy Document dept=Marketing sections=12
+2026-04-20 16:38:24 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=67
+2026-04-20 16:38:24 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Marketing' template='Marketing and Sales Alignment Document'
+2026-04-20 16:38:24 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:38:24 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Marketing and Sales Alignment Document dept=Marketing sections=13
+2026-04-20 16:39:33 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 16:39:33 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 16:39:33 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:39:33 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 16:39:36 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 16:39:36 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 16:39:36 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:39:36 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 16:39:37 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 16:39:37 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 16:39:37 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:39:37 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 16:39:41 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 16:39:41 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 16:39:41 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:39:41 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 16:39:44 [INFO    ] docforge.services.document generate_structured_document:155 — generate_structured_document | template='Employee Handbook' dept='Human Resources'
+2026-04-20 16:39:44 [DEBUG   ] docforge.services.prompt build_structured_prompt:998 — build_structured_prompt | template='Employee Handbook' archetype=POLICY sections=13
+2026-04-20 16:39:44 [INFO    ] docforge.services.llm generate_structured_document:210 — generate_structured_document: calling LLM | prompt_len=5553
+2026-04-20 16:40:17 [INFO    ] docforge.services.llm generate_structured_document:233 — generate_structured_document: success | sections=13 elapsed=33.7s
+2026-04-20 16:40:17 [DEBUG   ] docforge.services.document generate_structured_document:180 — LLM raw | sections=13
+2026-04-20 16:40:17 [DEBUG   ] docforge.services.validation run_validation_pipeline:338 — validation_pipeline | valid=False fatal_issues=8
+2026-04-20 16:40:17 [WARNING ] docforge.services.document _silent_regen_bad_sections:332 — silent_regen: 8 sections need regen but cap is 2 — skipping: ['Employee Benefits', 'Leave and Attendance Policy Summary', 'Performance Expectations and Review Cycle', 'Code of Conduct and Workplace Behavior', 'Disciplinary Process and Grievance Mechanism', 'Separation Policy and Exit Process']
+2026-04-20 16:40:17 [INFO    ] docforge.services.document _silent_regen_bad_sections:338 — silent_regen: regenerating 2 section(s): ['Welcome Message from CEO or Founder', 'Mission, Vision and Core Values']
+2026-04-20 16:40:17 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=1047
+2026-04-20 16:40:17 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional document writer for Turabit . Tone: Professional. No markdown. No bracket placeholders. Today: 20 April 202…
+2026-04-20 16:40:17 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate the 'Welcome Message from CEO or Founder' section for a Employee Handbook document.
+
+ROLE: BODY
+INSTRUCTION:
+Write comprehensive, detailed content — minimum 250 words. Expand every point with full explanation, context, and implications. Use all values from the provided answers. Clear para…
+2026-04-20 16:40:22 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=1895 elapsed=4.5s
+2026-04-20 16:40:22 [INFO    ] docforge.services.document _silent_regen_bad_sections:350 — silent_regen: done — Welcome Message from CEO or Founder
+2026-04-20 16:40:22 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=1043
+2026-04-20 16:40:22 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional document writer for Turabit . Tone: Professional. No markdown. No bracket placeholders. Today: 20 April 202…
+2026-04-20 16:40:22 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate the 'Mission, Vision and Core Values' section for a Employee Handbook document.
+
+ROLE: BODY
+INSTRUCTION:
+Write comprehensive, detailed content — minimum 250 words. Expand every point with full explanation, context, and implications. Use all values from the provided answers. Clear paragrap…
+2026-04-20 16:40:25 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=1944 elapsed=3.5s
+2026-04-20 16:40:25 [INFO    ] docforge.services.document _silent_regen_bad_sections:350 — silent_regen: done — Mission, Vision and Core Values
+2026-04-20 16:40:25 [INFO    ] docforge.services.document generate_structured_document:193 — generate_structured_document complete | sections=13
+2026-04-20 16:40:25 [INFO    ] docforge.services.document save_document:591 — save_document | session=42ce555d-75a5-4870-9496-938fb9a154d0 template=1
+2026-04-20 16:42:27 [INFO    ] docforge.services.document regenerate_section:442 — regenerate_section | doc_id=93 section='Employee Acknowledgement and Sign Off' feedback=True
+2026-04-20 16:42:27 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=2844
+2026-04-20 16:42:27 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Expert professional document writer for Human Resources. Tone: Professional. No markdown. No bracket placeholders. Today…
+2026-04-20 16:42:27 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate 'Employee Acknowledgement and Sign Off' section for a Employee Handbook document.
+
+DOCUMENT TYPE: Employee Handbook
+DEPARTMENT: Human Resources
+TODAY: 20 April 2026
+
+SECTION ROLE: SIGN_OFF
+DEPTH INSTRUCTION:
+Write a formal sign-off block ONLY (60-90 words). Include: closing statement, aut…
+2026-04-20 16:42:31 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=695 elapsed=3.6s
+2026-04-20 16:42:31 [INFO    ] docforge.services.document regenerate_section:555 — regenerate_section complete | doc_id=93 section='Employee Acknowledgement and Sign Off'
+2026-04-20 16:42:48 [INFO    ] docforge.services.document preview_document:611 — preview_document | template='Employee Handbook'
+2026-04-20 16:42:48 [DEBUG   ] docforge.services.prompt build_prompt:884 — build_prompt | template='Employee Handbook' archetype=POLICY sections=13
+2026-04-20 16:42:48 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=3792
+2026-04-20 16:42:48 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional business document writer. Tone: Professional. Return clean text — no ## no ** no markdown.…
+2026-04-20 16:42:48 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Today's date: 20 April 2026
+
+Company: India-based B2B SaaS
+Tone: formal and structured — policy-driven, must/shall for obligations; formal yet warm — clear, empathetic, professional
+
+Department: Human Resources
+Document Type: Employee Handbook
+Archetype: POLICY
+Purpose: Comprehensive guide covering …
+2026-04-20 16:43:25 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=15350 elapsed=36.9s
+2026-04-20 16:44:04 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=51
+2026-04-20 16:44:04 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='IT Operations' template='IT SOP'
+2026-04-20 16:44:04 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:44:04 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=IT SOP dept=IT Operations sections=12
+2026-04-20 16:44:07 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=57
+2026-04-20 16:44:07 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='IT Operations' template='IT Asset Management Policy'
+2026-04-20 16:44:07 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 16:44:07 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=IT Asset Management Policy dept=IT Operations sections=13
+2026-04-20 17:25:35 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 17:25:35 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 17:25:35 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 17:25:35 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13
+2026-04-20 17:26:06 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=31
+2026-04-20 17:26:06 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Product Management' template='Product Requirements Document'
+2026-04-20 17:26:06 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 17:26:06 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Product Requirements Document dept=Product Management sections=12
+2026-04-20 17:26:11 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=35
+2026-04-20 17:26:11 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Product Management' template='Product Strategy Document'
+2026-04-20 17:26:11 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 17:26:11 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Product Strategy Document dept=Product Management sections=12
+2026-04-20 17:26:38 [INFO    ] docforge.services.document generate_structured_document:155 — generate_structured_document | template='Product Strategy Document' dept='Product Management'
+2026-04-20 17:26:38 [DEBUG   ] docforge.services.prompt build_structured_prompt:998 — build_structured_prompt | template='Product Strategy Document' archetype=PLAN sections=12
+2026-04-20 17:26:38 [INFO    ] docforge.services.llm generate_structured_document:210 — generate_structured_document: calling LLM | prompt_len=4998
+2026-04-20 17:27:07 [INFO    ] docforge.services.llm generate_structured_document:233 — generate_structured_document: success | sections=12 elapsed=28.7s
+2026-04-20 17:27:07 [DEBUG   ] docforge.services.document generate_structured_document:180 — LLM raw | sections=12
+2026-04-20 17:27:07 [DEBUG   ] docforge.services.validation run_validation_pipeline:338 — validation_pipeline | valid=False fatal_issues=7
+2026-04-20 17:27:07 [WARNING ] docforge.services.document _silent_regen_bad_sections:332 — silent_regen: 7 sections need regen but cap is 2 — skipping: ['Customer Segments', 'Value Proposition', 'Strategic Goals', 'Product Initiatives', 'Strategic Roadmap']
+2026-04-20 17:27:07 [INFO    ] docforge.services.document _silent_regen_bad_sections:338 — silent_regen: regenerating 2 section(s): ['Product Vision', 'Market Opportunity']
+2026-04-20 17:27:07 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=834
+2026-04-20 17:27:07 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional document writer for Product Management. Tone: Professional. No markdown. No bracket placeholders. Today: 20…
+2026-04-20 17:27:07 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate the 'Product Vision' section for a Product Strategy Document document.
+
+ROLE: BODY
+INSTRUCTION:
+Write comprehensive, detailed content — minimum 250 words. Expand every point with full explanation, context, and implications. Use all values from the provided answers. Clear paragraphs — each…
+2026-04-20 17:27:12 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=2316 elapsed=5.5s
+2026-04-20 17:27:12 [INFO    ] docforge.services.document _silent_regen_bad_sections:350 — silent_regen: done — Product Vision
+2026-04-20 17:27:12 [INFO    ] docforge.services.llm generate_with_llm:93 — generate_with_llm: calling LLM | prompt_len=838
+2026-04-20 17:27:12 [DEBUG   ] docforge.services.llm generate_with_llm:94 — generate_with_llm: system=Professional document writer for Product Management. Tone: Professional. No markdown. No bracket placeholders. Today: 20…
+2026-04-20 17:27:12 [DEBUG   ] docforge.services.llm generate_with_llm:95 — generate_with_llm: prompt=Regenerate the 'Market Opportunity' section for a Product Strategy Document document.
+
+ROLE: BODY
+INSTRUCTION:
+Write comprehensive, detailed content — minimum 250 words. Expand every point with full explanation, context, and implications. Use all values from the provided answers. Clear paragraphs — …
+2026-04-20 17:27:17 [INFO    ] docforge.services.llm generate_with_llm:110 — generate_with_llm: success | chars=2194 elapsed=5.0s
+2026-04-20 17:27:17 [INFO    ] docforge.services.document _silent_regen_bad_sections:350 — silent_regen: done — Market Opportunity
+2026-04-20 17:27:17 [INFO    ] docforge.services.document generate_structured_document:193 — generate_structured_document complete | sections=12
+2026-04-20 17:27:17 [INFO    ] docforge.services.document save_document:591 — save_document | session=97035517-6af0-4167-b4e3-1210e29a70d9 template=35
+2026-04-20 19:04:09 [INFO    ] docforge.services.question get_form_structure:318 — get_form_structure | template_id=1
+2026-04-20 19:04:09 [INFO    ] docforge.services.question generate_smart_questions:273 — generate_smart_questions | dept='Human Resources' template='Employee Handbook'
+2026-04-20 19:04:09 [ERROR   ] docforge.services.question get_form_structure:341 — Smart question generation failed: '\n  "questions"'
+2026-04-20 19:04:09 [INFO    ] docforge.services.question get_form_structure:373 — form_structure | template=Employee Handbook dept=Human Resources sections=13

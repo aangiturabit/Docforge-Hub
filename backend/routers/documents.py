@@ -70,6 +70,13 @@ def get_document(document_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Document not found")
     return _serialize_doc(doc)
 
+@router.delete("/{document_id}")
+def delete_document(document_id: int, db: Session = Depends(get_db)):
+    if not crud.get_document_by_id(db, document_id):
+        raise HTTPException(status_code=404, detail="Document not found")
+    crud.delete_document(db, document_id)
+    return {"message": "Document deleted successfully"}
+
 @router.get("/drafts", response_model=List[DraftResponse])
 def get_drafts(db: Session = Depends(get_db)):
     return crud.get_all_drafts(db)
@@ -130,12 +137,6 @@ def delete_draft(document_id: int, db: Session = Depends(get_db)):
 
 
 
-@router.delete("/{document_id}")
-def delete_document(document_id: int, db: Session = Depends(get_db)):
-    if not crud.get_document_by_id(db, document_id):
-        raise HTTPException(status_code=404, detail="Document not found")
-    crud.delete_document(db, document_id)
-    return {"message": "Document deleted successfully"}
 
 
 @router.post("/{document_id}/regenerate-section")
