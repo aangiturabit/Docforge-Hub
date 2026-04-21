@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers import departments, templates, generate, sessions, notion ,documents
 from backend.routers import notion
+from backend.routers import download
 
 
 app = FastAPI(
@@ -29,7 +30,9 @@ app.include_router(templates.router, prefix="/api", tags=["Templates"])
 app.include_router(generate.router, prefix="/api", tags=["Generate"])
 app.include_router(sessions.router, prefix="/api", tags=["Sessions"])
 app.include_router(notion.router, prefix="/api", tags=["Notion"])
-app.include_router(documents.router, prefix="/api", tags=["Documents"])
+# app.include_router(documents.router, prefix="/api", tags=["Documents"])
+app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
+app.include_router(download.router)
 
 # ─────────────────────────────────────────
 # HEALTH CHECK

@@ -67,6 +67,7 @@ class SectionWithFieldsResponse(BaseModel):
 
 class GenerateQuestionsRequest(BaseModel):
     document_type_id: int
+    company: Optional[Dict[str, str]] = None
 
 
 

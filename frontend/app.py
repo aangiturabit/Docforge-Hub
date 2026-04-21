@@ -65,6 +65,38 @@ def api_delete(path, show_error=True):
         return False
 
 
+def fetch_pdf(document_id: int, company: dict = None):
+    """GET /documents/{id}/pdf → raw bytes or None."""
+    try:
+        params = {}
+        if company:
+            params["company_json"] = json.dumps(company)
+        r = requests.get(
+            f"{API_BASE}/documents/{document_id}/pdf",
+            params=params,
+            timeout=60,
+        )
+        return r.content if r.status_code == 200 else None
+    except Exception:
+        return None
+
+
+def fetch_docx(document_id: int, company: dict = None):
+    """GET /documents/{id}/docx → raw bytes or None."""
+    try:
+        params = {}
+        if company:
+            params["company_json"] = json.dumps(company)
+        r = requests.get(
+            f"{API_BASE}/documents/{document_id}/docx",
+            params=params,
+            timeout=60,
+        )
+        return r.content if r.status_code == 200 else None
+    except Exception:
+        return None
+
+
 # ═══════════════════════════════════════════════════════
 # UTILITIES
 # ═══════════════════════════════════════════════════════
@@ -72,7 +104,7 @@ def api_delete(path, show_error=True):
 def short_name(name, max_len=45):
     if len(name) <= max_len:
         return name
-    cut = name[:max_len]
+    cut        = name[:max_len]
     last_space = cut.rfind(" ")
     return (cut[:last_space] if last_space > 20 else cut) + "…"
 
@@ -91,7 +123,6 @@ STATUS_ICON = {
     "failed":       "🔴",
     "draft":        "🔵",
 }
-
 STATUS_LABEL = {
     "validated":    "Validated",
     "pending":      "Pending",
@@ -103,7 +134,10 @@ STATUS_LABEL = {
 
 def status_display(status):
     icon  = STATUS_ICON.get(status, "⚪")
-    label = STATUS_LABEL.get(status, status.replace("_", " ").title() if status else "Pending")
+    label = STATUS_LABEL.get(
+        status,
+        status.replace("_", " ").title() if status else "Pending",
+    )
     return f"{icon} {label}"
 
 
@@ -135,28 +169,6 @@ def escape_pipe(text):
 # ═══════════════════════════════════════════════════════
 # RENDERERS
 # ═══════════════════════════════════════════════════════
-
-def make_pdf(sections, title, company, dept):
-    try:
-        import sys, os
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from backend.renderers.pdf_renderer import render_pdf
-        return render_pdf(sections, title, company, dept)
-    except Exception as e:
-        st.error(f"PDF error: {e}")
-        return None
-
-
-def make_docx(sections, title, company, dept):
-    try:
-        import sys, os
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from backend.renderers.docx_renderer import render_docx
-        return render_docx(sections, title, company, dept)
-    except Exception as e:
-        st.error(f"DOCX error: {e}")
-        return None
-
 
 def render_section_content(section):
     ctype   = section.get("content_type", "text")
@@ -234,7 +246,7 @@ with st.sidebar:
     st.caption("Optional — improves document quality")
     st.divider()
 
-    co = st.session_state["company"]
+    co             = st.session_state["company"]
     co["name"]     = st.text_input("Company Name",  value=co["name"],     placeholder="Acme Corp")
     co["industry"] = st.text_input("Industry",      value=co["industry"], placeholder="Technology")
 
@@ -250,7 +262,6 @@ with st.sidebar:
         "Tone", _tones,
         index=_tones.index(co.get("tone", "Professional")),
     )
-
     st.divider()
     st.caption("DocForge Hub · v1.0")
 
@@ -266,8 +277,6 @@ st.divider()
 
 # ═══════════════════════════════════════════════════════
 # DEPARTMENT + TEMPLATE SELECTORS
-# Uses index-based selectbox — auto-selects first item
-# so questions load immediately without user interaction
 # ═══════════════════════════════════════════════════════
 
 dept_data  = api_get("/departments", show_error=False) or []
@@ -275,23 +284,23 @@ dept_names = [d["name"] for d in dept_data]
 dept_map   = {d["name"]: d["id"] for d in dept_data}
 
 if not dept_names:
-    st.warning("No departments found. Check that the backend is running.")
+    st.warning("No departments found. Check the backend is running.")
     st.stop()
 
 sel_col1, sel_col2 = st.columns([1, 2])
 
 with sel_col1:
-    dept_index = st.selectbox(
+    dept_idx      = st.selectbox(
         "Department",
         options=range(len(dept_names)),
         format_func=lambda i: dept_names[i],
         key="sb_dept_idx",
     )
-    selected_dept = dept_names[dept_index]
+    selected_dept = dept_names[dept_idx]
 
-# Load templates for selected dept
-dept_id   = dept_map.get(selected_dept)
+dept_id   = dept_map[selected_dept]
 tmpl_data = api_get(f"/templates/{dept_id}", show_error=False) or []
+
 tmpl_display_map   = {short_name(t["name"]): t["name"] for t in tmpl_data}
 tmpl_map           = {t["name"]: t["id"] for t in tmpl_data}
 tmpl_display_names = [short_name(t["name"]) for t in tmpl_data]
@@ -299,13 +308,13 @@ selected_template  = None
 
 with sel_col2:
     if tmpl_display_names:
-        tmpl_index = st.selectbox(
+        tmpl_idx = st.selectbox(
             "Document Type",
             options=range(len(tmpl_display_names)),
             format_func=lambda i: tmpl_display_names[i],
             key="sb_tmpl_idx",
         )
-        selected_template = tmpl_display_map.get(tmpl_display_names[tmpl_index])
+        selected_template = tmpl_display_map.get(tmpl_display_names[tmpl_idx])
     else:
         st.selectbox("Document Type", ["No templates found"], disabled=True)
 
@@ -322,7 +331,6 @@ def auto_load_questions():
 
     current_combo   = f"{selected_dept}||{selected_template}"
     current_company = company_sig(st.session_state.get("company"))
-
     combo_changed   = st.session_state.get("_loaded_combo") != current_combo
     company_changed = (
         st.session_state.get("_loaded_company") != current_company
@@ -332,8 +340,8 @@ def auto_load_questions():
     if not combo_changed and not company_changed:
         return
 
-    with st.spinner("Loading form fields…"):
-        data, err = api_post(
+    with st.spinner("Loading form…"):
+        data, _err = api_post(
             "/generate/questions",
             {
                 "document_type_id": tmpl_map.get(selected_template),
@@ -365,7 +373,7 @@ auto_load_questions()
 # TABS
 # ═══════════════════════════════════════════════════════
 
-tab_generate, tab_library = st.tabs(["Generate", "Document Library"])
+tab_generate, tab_library = st.tabs(["  Generate  ", "  Document Library  "])
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -378,53 +386,75 @@ with tab_generate:
     preview = st.session_state.get("preview_content")
 
     if not st.session_state.get("sections") and not doc:
-        st.info("Loading form fields… if this persists, check your backend is running.")
-        st.stop()
+        st.info("Loading form fields… if this persists, check the backend is running.")
 
-    form_col, doc_col = st.columns([1, 2], gap="large")
+    else:
+        form_col, doc_col = st.columns([1, 2], gap="large")
 
-    # ════════════════════════════════════════
-    # LEFT — Intake Form
-    # ════════════════════════════════════════
-    with form_col:
-        st.markdown(f"### {selected_template or 'Document'}")
-        st.caption(selected_dept or "")
-        st.write("")
-
-        if st.session_state.get("sections"):
-            answers = {}
-
-            for section in st.session_state["sections"]:
-                fields = section.get("fields", [])
-                if not fields:
-                    continue
-
-                with st.container(border=True):
-                    st.markdown(f"**{section['section_name']}**")
-                    st.write("")
-
-                    for field in fields:
-                        fn    = field["field_name"]
-                        label = field["field_label"]
-                        ftype = field["field_type"]
-
-                        if ftype == "textarea":
-                            answers[fn] = st.text_area(label, key=f"f_{fn}", height=80)
-                        elif ftype == "date":
-                            answers[fn] = str(st.date_input(label, key=f"f_{fn}"))
-                        elif ftype == "number":
-                            answers[fn] = str(st.number_input(label, key=f"f_{fn}", step=1))
-                        else:
-                            answers[fn] = st.text_input(label, key=f"f_{fn}")
-
-            st.session_state["answers"] = answers
+        # ════════════════════════════════════════
+        # LEFT — Intake Form
+        # ════════════════════════════════════════
+        with form_col:
+            st.markdown(f"### {selected_template or 'Document'}")
+            st.caption(selected_dept or "")
             st.write("")
 
-            gc1, gc2 = st.columns(2)
+            if st.session_state.get("sections"):
+                answers = {}
 
-            with gc1:
-                if st.button("Generate Document", type="primary",
-                             use_container_width=True, key="gen_doc_btn"):
+                top1, top2 = st.columns(2)
+                with top1:
+                    gen_top = st.button(
+                        "Generate Document", type="primary",
+                        use_container_width=True, key="gen_top",
+                    )
+                with top2:
+                    prev_top = st.button(
+                        "Preview",
+                        use_container_width=True, key="prev_top",
+                    )
+
+                st.divider()
+
+                for section in st.session_state["sections"]:
+                    fields = section.get("fields", [])
+                    if not fields:
+                        continue
+
+                    with st.container(border=True):
+                        st.markdown(f"**{section['section_name']}**")
+                        st.write("")
+
+                        for field in fields:
+                            fn    = field["field_name"]
+                            label = field["field_label"]
+                            ftype = field["field_type"]
+
+                            if ftype == "textarea":
+                                answers[fn] = st.text_area(label, key=f"f_{fn}", height=80)
+                            elif ftype == "date":
+                                answers[fn] = str(st.date_input(label, key=f"f_{fn}"))
+                            elif ftype == "number":
+                                answers[fn] = str(st.number_input(label, key=f"f_{fn}", step=1))
+                            else:
+                                answers[fn] = st.text_input(label, key=f"f_{fn}")
+
+                st.session_state["answers"] = answers
+
+                st.divider()
+                bot1, bot2 = st.columns(2)
+                with bot1:
+                    gen_bot = st.button(
+                        "Generate Document", type="primary",
+                        use_container_width=True, key="gen_bot",
+                    )
+                with bot2:
+                    prev_bot = st.button(
+                        "Preview",
+                        use_container_width=True, key="prev_bot",
+                    )
+
+                if gen_top or gen_bot:
                     with st.spinner("Generating document…"):
                         data, err = api_post(
                             "/generate/document",
@@ -444,8 +474,7 @@ with tab_generate:
                         else:
                             st.error(f"Generation failed: {err}")
 
-            with gc2:
-                if st.button("Preview", use_container_width=True, key="prev_btn"):
+                if prev_top or prev_bot:
                     with st.spinner("Generating preview…"):
                         pdata, _ = api_post(
                             "/generate/preview",
@@ -461,137 +490,143 @@ with tab_generate:
                             st.session_state["document"]        = None
                             st.rerun()
 
-    # ════════════════════════════════════════
-    # RIGHT — Document Output
-    # ════════════════════════════════════════
-    with doc_col:
+        # ════════════════════════════════════════
+        # RIGHT — Document Output
+        # ════════════════════════════════════════
+        with doc_col:
 
-        if not doc and not preview:
-            st.info("Fill in the form and click **Generate Document** to see your document here.")
+            if not doc and not preview:
+                with st.container(border=True):
+                    st.markdown("#### Your document will appear here")
+                    st.caption("Fill in the form and click **Generate Document**.")
+                    st.write("")
+                    st.markdown(
+                        "- AI generates all sections from your inputs\n"
+                        "- Rewrite any section individually\n"
+                        "- Download as PDF or DOCX\n"
+                        "- Publish to Notion"
+                    )
 
-        elif preview:
-            st.info("Preview mode — not saved to library.")
-            st.markdown(f"## {st.session_state.get('template_name', 'Preview')}")
-            st.divider()
-            render_plain(preview)
+            elif preview:
+                st.info("Preview mode — not saved to library.")
+                st.markdown(f"## {st.session_state.get('template_name', 'Preview')}")
+                st.divider()
+                render_plain(preview)
 
-        elif doc:
-            sections   = get_sections(doc)
-            doc_title  = doc.get("title", selected_template or "Document")
-            company    = st.session_state.get("company")
-            dept_name  = st.session_state.get("department_name", "")
-            val_status = doc.get("validation_status", "pending")
+            elif doc:
+                sections   = get_sections(doc)
+                doc_title  = doc.get("title", selected_template or "Document")
+                company    = st.session_state.get("company")
+                doc_id     = doc["document_id"]
+                val_status = doc.get("validation_status", "pending")
 
-            st.markdown(f"## {doc_title}")
+                st.markdown(f"## {doc_title}")
 
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Status",  status_display(val_status))
-            m2.metric("Version", f"v{doc.get('version', '1.0')}")
-            m3.metric("Doc ID",  str(doc.get("document_id", "—")))
+                m1, m2, m3 = st.columns(3)
+                m1.metric("Status",  status_display(val_status))
+                m2.metric("Version", f"v{doc.get('version', '1.0')}")
+                m3.metric("Doc ID",  str(doc_id))
 
-            st.divider()
+                st.divider()
 
-            a1, a2, a3 = st.columns(3)
+                act1, act2, act3 = st.columns(3)
 
-            with a1:
-                if sections:
-                    pdf_bytes = make_pdf(sections, doc_title, company, dept_name)
-                    if pdf_bytes:
+                with act1:
+                    pdf_b = fetch_pdf(doc_id, company)
+                    if pdf_b:
                         st.download_button(
-                            "Download PDF", data=pdf_bytes,
+                            "Download PDF", data=pdf_b,
                             file_name=f"{doc_title}.pdf",
                             mime="application/pdf",
-                            use_container_width=True, key="dl_pdf",
+                            use_container_width=True, key="gen_dl_pdf",
                         )
                     else:
                         st.button("Download PDF", disabled=True,
-                                  use_container_width=True, key="dl_pdf_d")
-                else:
-                    st.button("Download PDF", disabled=True,
-                              use_container_width=True, key="dl_pdf_d2")
+                                  use_container_width=True, key="gen_dl_pdf_d")
 
-            with a2:
-                if sections:
-                    docx_bytes = make_docx(sections, doc_title, company, dept_name)
-                    if docx_bytes:
+                with act2:
+                    docx_b = fetch_docx(doc_id, company)
+                    if docx_b:
                         st.download_button(
-                            "Download DOCX", data=docx_bytes,
+                            "Download DOCX", data=docx_b,
                             file_name=f"{doc_title}.docx",
                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                            use_container_width=True, key="dl_docx",
+                            use_container_width=True, key="gen_dl_docx",
                         )
                     else:
                         st.button("Download DOCX", disabled=True,
-                                  use_container_width=True, key="dl_docx_d")
-                else:
-                    st.button("Download DOCX", disabled=True,
-                              use_container_width=True, key="dl_docx_d2")
+                                  use_container_width=True, key="gen_dl_docx_d")
 
-            with a3:
-                if st.button("Publish to Notion", use_container_width=True, key="notion_btn"):
-                    with st.spinner("Publishing…"):
-                        ndata, nerr = api_post("/notion/publish",
-                                               {"document_id": doc["document_id"]})
-                        if ndata:
-                            st.success(f"Published. [Open in Notion]({ndata.get('notion_url', '')})")
-                        else:
-                            st.error(f"Notion error: {nerr}")
+                with act3:
+                    if st.button("Publish to Notion", use_container_width=True, key="notion_gen"):
+                        with st.spinner("Publishing…"):
+                            ndata, nerr = api_post("/notion/publish", {"document_id": doc_id})
+                            if ndata:
+                                st.success(f"Published — [Open in Notion]({ndata.get('notion_url', '')})")
+                            else:
+                                st.error(f"Notion error: {nerr}")
 
-            st.divider()
+                st.divider()
 
-            if sections:
-                for section in sections:
-                    heading = section.get("heading", "")
-                    if not heading:
-                        continue
+                if sections:
+                    for section in sections:
+                        heading = section.get("heading", "")
+                        if not heading:
+                            continue
 
-                    with st.container(border=True):
-                        h_col, btn_col = st.columns([5, 1])
+                        with st.container(border=True):
+                            h_col, btn_col = st.columns([5, 1])
 
-                        with h_col:
-                            st.markdown(f"#### {heading}")
+                            with h_col:
+                                st.markdown(f"#### {heading}")
 
-                        with btn_col:
-                            with st.popover("Rewrite"):
-                                st.markdown(f"**{heading}**")
-                                feedback = st.text_area(
-                                    "Instructions (optional)",
-                                    placeholder="e.g. Make it more formal…",
-                                    key=f"fb_{heading[:30]}",
-                                    height=80,
+                            with btn_col:
+                                rkey = (
+                                    heading[:28]
+                                    .replace(" ", "_")
+                                    .replace("/", "_")
+                                    .replace("(", "")
+                                    .replace(")", "")
                                 )
-                                if st.button(
-                                    "Regenerate",
-                                    key=f"regen_{heading[:30].replace(' ', '_').replace('/', '_')}",
-                                    type="primary",
-                                    use_container_width=True,
-                                ):
-                                    with st.spinner(f"Rewriting '{heading}'…"):
-                                        result, err = api_post(
-                                            "/generate/section",
-                                            {
-                                                "document_id":  doc["document_id"],
-                                                "section_name": heading,
-                                                "answers":      st.session_state.get("answers", {}),
-                                                "feedback":     feedback or None,
-                                                "company":      st.session_state.get("company"),
-                                            },
-                                        )
-                                    if result:
-                                        updated = api_get(
-                                            f"/documents/{doc['document_id']}",
-                                            show_error=False,
-                                        )
-                                        if updated:
-                                            st.session_state["document"] = updated
-                                            st.rerun()
-                                    else:
-                                        st.error(f"Rewrite failed: {err}")
+                                with st.popover("Rewrite", use_container_width=True):
+                                    st.markdown(f"**{heading}**")
+                                    feedback = st.text_area(
+                                        "Instructions (optional)",
+                                        placeholder="e.g. More formal, add more detail…",
+                                        key=f"fb_{rkey}",
+                                        height=80,
+                                    )
+                                    if st.button(
+                                        "Regenerate",
+                                        key=f"regen_{rkey}",
+                                        type="primary",
+                                        use_container_width=True,
+                                    ):
+                                        with st.spinner(f"Rewriting '{heading}'…"):
+                                            result, err = api_post(
+                                                "/generate/section",
+                                                {
+                                                    "document_id":  doc_id,
+                                                    "section_name": heading,
+                                                    "answers":      st.session_state.get("answers", {}),
+                                                    "feedback":     feedback or None,
+                                                    "company":      st.session_state.get("company"),
+                                                },
+                                            )
+                                        if result:
+                                            updated = api_get(
+                                                f"/documents/{doc_id}",
+                                                show_error=False,
+                                            )
+                                            if updated:
+                                                st.session_state["document"] = updated
+                                                st.rerun()
+                                        else:
+                                            st.error(f"Rewrite failed: {err}")
 
-                        render_section_content(section)
-
-            else:
-                render_plain(doc.get("content", ""))
+                            render_section_content(section)
+                else:
+                    render_plain(doc.get("content", ""))
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -603,15 +638,13 @@ with tab_library:
     if st.session_state.get("library_doc"):
         lib_doc   = st.session_state["library_doc"]
         lib_title = lib_doc.get("title", "Document")
-        company   = st.session_state.get("company")
         sections  = get_sections(lib_doc)
 
-        back_col, title_col = st.columns([1, 6])
+        back_col, title_col = st.columns([1, 7])
         with back_col:
-            if st.button("Back", use_container_width=True, key="back_lib"):
+            if st.button("← Back", use_container_width=True, key="lib_back"):
                 st.session_state["library_doc"] = None
                 st.rerun()
-
         with title_col:
             st.markdown(f"## {lib_title}")
             st.caption(
@@ -622,25 +655,6 @@ with tab_library:
 
         st.divider()
 
-        dl1, dl2, _ = st.columns([1, 1, 5])
-        with dl1:
-            if sections:
-                pdf_b = make_pdf(sections, lib_title, company, "")
-                if pdf_b:
-                    st.download_button("Download PDF", data=pdf_b,
-                                       file_name=f"{lib_title}.pdf",
-                                       mime="application/pdf",
-                                       use_container_width=True, key="lib_dl_pdf")
-        with dl2:
-            if sections:
-                docx_b = make_docx(sections, lib_title, company, "")
-                if docx_b:
-                    st.download_button("Download DOCX", data=docx_b,
-                                       file_name=f"{lib_title}.docx",
-                                       mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                       use_container_width=True, key="lib_dl_docx")
-
-        st.write("")
         if sections:
             for section in sections:
                 heading = section.get("heading", "")
@@ -651,147 +665,158 @@ with tab_library:
         else:
             render_plain(lib_doc.get("content", ""))
 
-        st.stop()
-
-    # ── Library list ──
-    st.markdown("### Document Library")
-    st.divider()
-
-    f1, f2, f3 = st.columns(3)
-
-    with f1:
-        dept_data_lib   = api_get("/departments", show_error=False) or []
-        dept_filter_map = {d["name"]: d["id"] for d in dept_data_lib}
-        filter_dept     = st.selectbox(
-            "Department",
-            ["All Departments"] + [d["name"] for d in dept_data_lib],
-            key="lib_dept_f",
-        )
-
-    with f2:
-        tmpl_lib = []
-        if filter_dept != "All Departments":
-            tmpl_lib = api_get(f"/templates/{dept_filter_map[filter_dept]}", show_error=False) or []
-        else:
-            for d in dept_data_lib:
-                tmpl_lib.extend(api_get(f"/templates/{d['id']}", show_error=False) or [])
-        tmpl_lib_disp = {short_name(t["name"]): t["id"] for t in tmpl_lib}
-        filter_tmpl   = st.selectbox(
-            "Document Type",
-            ["All Document Types"] + list(tmpl_lib_disp.keys()),
-            key="lib_tmpl_f",
-        )
-
-    with f3:
-        filter_status = st.selectbox(
-            "Status",
-            ["All", "validated", "pending", "needs_review", "failed"],
-            key="lib_status_f",
-        )
-
-    st.divider()
-
-    params = {}
-    if filter_dept != "All Departments":
-        params["department_id"] = dept_filter_map[filter_dept]
-    if filter_tmpl != "All Document Types":
-        params["template_id"] = tmpl_lib_disp.get(filter_tmpl)
-
-    raw_docs = api_get("/documents", params=params, show_error=True)
-    if raw_docs is None:
-        st.warning("Could not load documents.")
-        st.stop()
-
-    docs = raw_docs or []
-    if filter_status != "All":
-        docs = [d for d in docs if d.get("validation_status") == filter_status]
-
-    if not docs:
-        st.info("No documents found. Generate your first document to see it here.")
     else:
-        company = st.session_state.get("company")
-        st.caption(f"{len(docs)} document(s) found")
-        st.write("")
+        st.markdown("### Document Library")
+        st.divider()
 
-        for doc in docs:
-            title   = doc.get("title", "Untitled")
-            val     = doc.get("validation_status", "pending")
-            version = doc.get("version", "1.0")
-            created = format_date(doc.get("created_at", ""))
-            doc_id  = doc["document_id"]
-            secs    = get_sections(doc)
+        f1, f2, f3 = st.columns(3)
 
-            with st.container(border=True):
-                info_col, act_col = st.columns([3, 2])
+        with f1:
+            dept_data_lib   = api_get("/departments", show_error=False) or []
+            dept_filter_map = {d["name"]: d["id"] for d in dept_data_lib}
+            filter_dept     = st.selectbox(
+                "Department",
+                ["All Departments"] + [d["name"] for d in dept_data_lib],
+                key="lib_dept_f",
+            )
 
-                with info_col:
-                    st.markdown(f"**{title}**")
-                    st.caption(f"v{version}  ·  {created}  ·  {status_display(val)}")
+        with f2:
+            tmpl_lib = []
+            if filter_dept != "All Departments":
+                tmpl_lib = api_get(f"/templates/{dept_filter_map[filter_dept]}", show_error=False) or []
+            else:
+                for d in dept_data_lib:
+                    tmpl_lib.extend(api_get(f"/templates/{d['id']}", show_error=False) or [])
+            tmpl_lib_disp = {short_name(t["name"]): t["id"] for t in tmpl_lib}
+            filter_tmpl   = st.selectbox(
+                "Document Type",
+                ["All Document Types"] + list(tmpl_lib_disp.keys()),
+                key="lib_tmpl_f",
+            )
 
-                with act_col:
-                    b1, b2, b3, b4 = st.columns(4)
+        with f3:
+            filter_status = st.selectbox(
+                "Status",
+                ["All", "validated", "pending", "needs_review", "failed"],
+                key="lib_status_f",
+            )
 
-                    with b1:
-                        if st.button("View", key=f"v_{doc_id}", use_container_width=True):
-                            st.session_state["library_doc"] = doc
-                            st.rerun()
+        st.divider()
 
-                    with b2:
-                        if secs:
-                            pdf_b = make_pdf(secs, title, company, "")
-                            if pdf_b:
-                                st.download_button("PDF", data=pdf_b,
-                                                   file_name=f"{title}.pdf",
-                                                   mime="application/pdf",
-                                                   use_container_width=True,
-                                                   key=f"pdf_{doc_id}")
-                            else:
-                                st.button("PDF", disabled=True,
-                                          use_container_width=True, key=f"pdf_d_{doc_id}")
-                        else:
-                            st.button("PDF", disabled=True,
-                                      use_container_width=True, key=f"pdf_d2_{doc_id}")
+        params = {}
+        if filter_dept != "All Departments":
+            params["department_id"] = dept_filter_map[filter_dept]
+        if filter_tmpl != "All Document Types":
+            params["template_id"] = tmpl_lib_disp.get(filter_tmpl)
 
-                    with b3:
-                        if secs:
-                            docx_b = make_docx(secs, title, company, "")
-                            if docx_b:
-                                st.download_button("DOCX", data=docx_b,
-                                                   file_name=f"{title}.docx",
-                                                   mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                                   use_container_width=True,
-                                                   key=f"docx_{doc_id}")
-                            else:
-                                st.button("DOCX", disabled=True,
-                                          use_container_width=True, key=f"docx_d_{doc_id}")
-                        else:
-                            st.button("DOCX", disabled=True,
-                                      use_container_width=True, key=f"docx_d2_{doc_id}")
+        raw_docs = api_get("/documents", params=params, show_error=True)
 
-                    with b4:
-                        if st.button("Delete", key=f"del_{doc_id}", use_container_width=True):
-                            if api_delete(f"/documents/{doc_id}"):
-                                st.success("Deleted.")
-                                st.rerun()
+        if raw_docs is None:
+            st.warning("Could not load documents.")
+        else:
+            docs = raw_docs or []
+            if filter_status != "All":
+                docs = [d for d in docs if d.get("validation_status") == filter_status]
 
-                with st.expander("Publish to Notion"):
-                    if st.button("Publish", key=f"notion_{doc_id}"):
-                        with st.spinner("Publishing…"):
-                            ndata, nerr = api_post("/notion/publish", {"document_id": doc_id})
-                            if ndata:
-                                st.success(f"Published. [Open in Notion]({ndata.get('notion_url', '')})")
-                            else:
-                                st.error(f"Error: {nerr}")
+            if not docs:
+                st.info("No documents found. Generate your first document to see it here.")
+            else:
+                company = st.session_state.get("company")
+                st.caption(f"{len(docs)} document(s)")
+                st.write("")
+
+                for doc in docs:
+                    title   = doc.get("title", "Untitled")
+                    val     = doc.get("validation_status", "pending")
+                    version = doc.get("version", "1.0")
+                    created = format_date(doc.get("created_at", ""))
+                    doc_id  = doc["document_id"]
+
+                    with st.container(border=True):
+                        info_col, act_col = st.columns([2, 3])
+
+                        with info_col:
+                            st.markdown(f"**{title}**")
+                            st.caption(f"v{version}  ·  {created}  ·  {status_display(val)}")
+
+                        with act_col:
+                            b_view, b_pdf, b_docx, b_del = st.columns(4)
+
+                            with b_view:
+                                if st.button("View", key=f"v_{doc_id}", use_container_width=True):
+                                    st.session_state["library_doc"] = doc
+                                    st.rerun()
+
+                            with b_pdf:
+                                pdf_b = fetch_pdf(doc_id, company)
+                                if pdf_b:
+                                    st.download_button(
+                                        "PDF", data=pdf_b,
+                                        file_name=f"{title}.pdf",
+                                        mime="application/pdf",
+                                        use_container_width=True,
+                                        key=f"pdf_{doc_id}",
+                                    )
+                                else:
+                                    st.button("PDF", disabled=True,
+                                              use_container_width=True, key=f"pdf_d_{doc_id}")
+
+                            with b_docx:
+                                docx_b = fetch_docx(doc_id, company)
+                                if docx_b:
+                                    st.download_button(
+                                        "DOCX", data=docx_b,
+                                        file_name=f"{title}.docx",
+                                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                        use_container_width=True,
+                                        key=f"docx_{doc_id}",
+                                    )
+                                else:
+                                    st.button("DOCX", disabled=True,
+                                              use_container_width=True, key=f"docx_d_{doc_id}")
+
+                            with b_del:
+                                if st.button("Delete", key=f"del_{doc_id}", use_container_width=True):
+                                    if api_delete(f"/documents/{doc_id}"):
+                                        st.success("Deleted.")
+                                        st.rerun()
+
+                        with st.expander("Publish to Notion"):
+                            if st.button("Publish", key=f"notion_{doc_id}"):
+                                with st.spinner("Publishing…"):
+                                    ndata, nerr = api_post("/notion/publish", {"document_id": doc_id})
+                                    if ndata:
+                                        st.success(f"Published — [Open in Notion]({ndata.get('notion_url', '')})")
+                                    else:
+                                        st.error(f"Error: {nerr}")
 
 st.caption("DocForge Hub · Powered by AI")
+
+
+
+# """
+# DocForge Hub — Final Professional UI
+# ──────────────────────────────────────
+# Pure native Streamlit. No CSS injection.
+
+# Layout decisions
+# ────────────────
+# • Department + Template: index-based selectors, auto-selects first item.
+#   Questions load immediately on first render — no blank "select" prompt.
+# • Generate tab: 1:2 column split. Form left, document right.
+#   Generate + Preview buttons at TOP and BOTTOM of form — always reachable.
+# • Document view: clean 3-button action bar (PDF | DOCX | Notion). No ghost columns.
+# • fetch_pdf / fetch_docx: call API endpoints /documents/{id}/pdf|docx — no direct renderer imports.
+# • Library list: each card has View | PDF | DOCX | Delete.
+# • Library doc view: section-only read view. NO download buttons (they're on the list card).
+# • No st.stop() inside tab blocks — conditional rendering throughout.
+# """
 
 # import json
 # from datetime import datetime
 
 # import requests
 # import streamlit as st
-
-# # API_BASE = "http://127.0.0.1:8000/api"
 
 # API_BASE = "http://localhost:8000/api"
 
@@ -817,7 +842,7 @@ st.caption("DocForge Hub · Powered by AI")
 #         return None
 #     except requests.exceptions.ConnectionError:
 #         if show_error:
-#             st.error("⚠️ Cannot connect to backend. Is the server running?")
+#             st.error("Cannot connect to backend. Is the server running?")
 #         return None
 #     except Exception as e:
 #         if show_error:
@@ -853,50 +878,52 @@ st.caption("DocForge Hub · Powered by AI")
 #             st.error(str(e))
 #         return False
 
-# def fetch_pdf(document_id, company=None):
+
+# # ═══════════════════════════════════════════════════════
+# # DOWNLOAD HELPERS — call backend API endpoints
+# #
+# # Calls GET /documents/{id}/pdf and /docx instead of
+# # importing renderers directly into the Streamlit process.
+# # Errors swallowed silently — caller receives None and
+# # renders a disabled button with no red error block.
+# # ═══════════════════════════════════════════════════════
+
+# def fetch_pdf(document_id: int, company: dict = None):
+#     """Call GET /documents/{id}/pdf → raw bytes, or None on error."""
 #     try:
 #         params = {}
 #         if company:
 #             params["company_json"] = json.dumps(company)
-
 #         r = requests.get(
 #             f"{API_BASE}/documents/{document_id}/pdf",
 #             params=params,
-#             timeout=60
+#             timeout=60,
 #         )
-
 #         if r.status_code == 200:
 #             return r.content
-
-#         st.error(f"PDF error {r.status_code}: {r.text[:200]}")
+#         return None
+#     except Exception:
 #         return None
 
-#     except Exception as e:
-#         st.error(f"PDF fetch failed: {e}")
-#         return None
-    
 
-# def fetch_docx(document_id, company=None):
+# def fetch_docx(document_id: int, company: dict = None):
+#     """Call GET /documents/{id}/docx → raw bytes, or None on error."""
 #     try:
 #         params = {}
 #         if company:
 #             params["company_json"] = json.dumps(company)
-
 #         r = requests.get(
 #             f"{API_BASE}/documents/{document_id}/docx",
 #             params=params,
-#             timeout=60
+#             timeout=60,
 #         )
-
 #         if r.status_code == 200:
 #             return r.content
-
-#         st.error(f"DOCX error {r.status_code}: {r.text[:200]}")
+#         return None
+#     except Exception:
 #         return None
 
-#     except Exception as e:
-#         st.error(f"DOCX fetch failed: {e}")
-#         return None
+
 # # ═══════════════════════════════════════════════════════
 # # UTILITIES
 # # ═══════════════════════════════════════════════════════
@@ -904,7 +931,7 @@ st.caption("DocForge Hub · Powered by AI")
 # def short_name(name, max_len=45):
 #     if len(name) <= max_len:
 #         return name
-#     cut = name[:max_len]
+#     cut        = name[:max_len]
 #     last_space = cut.rfind(" ")
 #     return (cut[:last_space] if last_space > 20 else cut) + "…"
 
@@ -917,25 +944,27 @@ st.caption("DocForge Hub · Powered by AI")
 
 
 # STATUS_ICON = {
-#     "validated":   "🟢",
-#     "pending":     "🟡",
-#     "needs_review":"🟠",
-#     "failed":      "🔴",
-#     "draft":       "🔵",
+#     "validated":    "🟢",
+#     "pending":      "🟡",
+#     "needs_review": "🟠",
+#     "failed":       "🔴",
+#     "draft":        "🔵",
 # }
-
 # STATUS_LABEL = {
-#     "validated":   "Validated",
-#     "pending":     "Pending",
-#     "needs_review":"Needs Review",
-#     "failed":      "Failed",
-#     "draft":       "Draft",
+#     "validated":    "Validated",
+#     "pending":      "Pending",
+#     "needs_review": "Needs Review",
+#     "failed":       "Failed",
+#     "draft":        "Draft",
 # }
 
 
 # def status_display(status):
 #     icon  = STATUS_ICON.get(status, "⚪")
-#     label = STATUS_LABEL.get(status, status.replace("_", " ").title() if status else "Pending")
+#     label = STATUS_LABEL.get(
+#         status,
+#         status.replace("_", " ").title() if status else "Pending",
+#     )
 #     return f"{icon} {label}"
 
 
@@ -965,33 +994,10 @@ st.caption("DocForge Hub · Powered by AI")
 
 
 # # ═══════════════════════════════════════════════════════
-# # RENDERERS
+# # SECTION / DOCUMENT RENDERERS
 # # ═══════════════════════════════════════════════════════
 
-# def make_pdf(sections, title, company, dept):
-#     try:
-#         import sys, os
-#         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-#         from backend.renderers.pdf_renderer import render_pdf
-#         return render_pdf(sections, title, company, dept)
-#     except Exception as e:
-#         st.error(f"PDF error: {e}")
-#         return None
-
-
-# def make_docx(sections, title, company, dept):
-#     try:
-#         import sys, os
-#         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-#         from backend.renderers.docx_renderer import render_docx
-#         return render_docx(sections, title, company, dept)
-#     except Exception as e:
-#         st.error(f"DOCX error: {e}")
-#         return None
-
-
 # def render_section_content(section):
-#     """Render a single section's content cleanly."""
 #     ctype   = section.get("content_type", "text")
 #     content = section.get("content", "")
 
@@ -1035,18 +1041,18 @@ st.caption("DocForge Hub · Powered by AI")
 # # ═══════════════════════════════════════════════════════
 
 # _defaults = {
-#     "session_id":       None,
-#     "sections":         None,
-#     "department_id":    None,
-#     "template_id":      None,
-#     "template_name":    None,
-#     "department_name":  None,
-#     "document":         None,
-#     "preview_content":  None,
-#     "answers":          {},
-#     "library_doc":      None,
-#     "_loaded_combo":    None,
-#     "_loaded_company":  None,
+#     "session_id":      None,
+#     "sections":        None,
+#     "department_id":   None,
+#     "template_id":     None,
+#     "template_name":   None,
+#     "department_name": None,
+#     "document":        None,
+#     "preview_content": None,
+#     "answers":         {},
+#     "library_doc":     None,
+#     "_loaded_combo":   None,
+#     "_loaded_company": None,
 #     "company": {
 #         "name": "", "industry": "", "size": "",
 #         "location": "", "tone": "Professional",
@@ -1059,79 +1065,87 @@ st.caption("DocForge Hub · Powered by AI")
 
 
 # # ═══════════════════════════════════════════════════════
-# # SIDEBAR — Company Context only
+# # SIDEBAR — Company Context
 # # ═══════════════════════════════════════════════════════
 
 # with st.sidebar:
-#     st.markdown("### 🏢 Company Context")
+#     st.markdown("### Company Context")
 #     st.caption("Optional — improves document quality")
 #     st.divider()
 
-#     co = st.session_state["company"]
-#     co["name"]     = st.text_input("Company Name",   value=co["name"],     placeholder="Acme Corp")
-#     co["industry"] = st.text_input("Industry",       value=co["industry"], placeholder="Technology")
+#     co             = st.session_state["company"]
+#     co["name"]     = st.text_input("Company Name",  value=co["name"],     placeholder="Acme Corp")
+#     co["industry"] = st.text_input("Industry",      value=co["industry"], placeholder="Technology")
 
 #     _sizes = ["", "1–10", "11–50", "51–200", "201–500", "500+"]
 #     co["size"] = st.selectbox(
 #         "Company Size", _sizes,
 #         index=_sizes.index(co.get("size", "")) if co.get("size", "") in _sizes else 0,
 #     )
-#     co["location"] = st.text_input("Location",  value=co["location"], placeholder="Mumbai, India")
+#     co["location"] = st.text_input("Location", value=co["location"], placeholder="Mumbai, India")
+
 #     _tones = ["Professional", "Formal", "Friendly", "Technical", "Empathetic"]
 #     co["tone"] = st.selectbox(
 #         "Tone", _tones,
 #         index=_tones.index(co.get("tone", "Professional")),
 #     )
-
 #     st.divider()
 #     st.caption("DocForge Hub · v1.0")
 
 
 # # ═══════════════════════════════════════════════════════
-# # MAIN HEADER
+# # HEADER
 # # ═══════════════════════════════════════════════════════
 
-# st.markdown("# 🗂️ DocForge Hub")
-# st.caption("AI-powered document generation · Select a department and document type to begin")
+# st.markdown("# DocForge Hub")
+# st.caption("AI-powered document generation")
 # st.divider()
 
 
 # # ═══════════════════════════════════════════════════════
-# # TOP NAV — Department + Template selectors
+# # DEPARTMENT + TEMPLATE SELECTORS
+# # Index-based — auto-selects first item on load.
+# # Questions fire immediately without a manual selection step.
 # # ═══════════════════════════════════════════════════════
 
 # dept_data  = api_get("/departments", show_error=False) or []
 # dept_names = [d["name"] for d in dept_data]
 # dept_map   = {d["name"]: d["id"] for d in dept_data}
 
-# sel_col1, sel_col2, sel_col3 = st.columns([2, 3, 1])
+# if not dept_names:
+#     st.warning("No departments found. Check the backend is running.")
+#     st.stop()
+
+# sel_col1, sel_col2 = st.columns([1, 2])
 
 # with sel_col1:
-#     selected_dept = st.selectbox(
+#     dept_idx      = st.selectbox(
 #         "Department",
-#         ["— select —"] + dept_names,
-#         label_visibility="visible",
+#         options=range(len(dept_names)),
+#         format_func=lambda i: dept_names[i],
+#         key="sb_dept_idx",
 #     )
-#     if selected_dept == "— select —":
-#         selected_dept = None
+#     selected_dept = dept_names[dept_idx]
 
-# tmpl_map         = {}
-# tmpl_display_map = {}
-# selected_template = None
+# dept_id   = dept_map[selected_dept]
+# tmpl_data = api_get(f"/templates/{dept_id}", show_error=False) or []
+
+# tmpl_display_map   = {short_name(t["name"]): t["name"] for t in tmpl_data}
+# tmpl_map           = {t["name"]: t["id"] for t in tmpl_data}
+# tmpl_display_names = [short_name(t["name"]) for t in tmpl_data]
+# selected_template  = None
 
 # with sel_col2:
-#     if selected_dept:
-#         dept_id   = dept_map.get(selected_dept)
-#         tmpl_data = api_get(f"/templates/{dept_id}", show_error=False) or []
-#         tmpl_display_map = {short_name(t["name"]): t["name"] for t in tmpl_data}
-#         tmpl_map         = {t["name"]: t["id"] for t in tmpl_data}
-#         tmpl_display_names = [short_name(t["name"]) for t in tmpl_data]
-
-#         sel_display = st.selectbox("Document Type", ["— select —"] + tmpl_display_names)
-#         if sel_display != "— select —":
-#             selected_template = tmpl_display_map.get(sel_display)
+#     if tmpl_display_names:
+#         tmpl_idx = st.selectbox(
+#             "Document Type",
+#             options=range(len(tmpl_display_names)),
+#             format_func=lambda i: tmpl_display_names[i],
+#             key="sb_tmpl_idx",
+#         )
+#         selected_template = tmpl_display_map.get(tmpl_display_names[tmpl_idx])
 #     else:
-#         st.selectbox("Document Type", ["— select department first —"], disabled=True)
+#         st.selectbox("Document Type", ["No templates found"], disabled=True)
 
 # st.divider()
 
@@ -1146,7 +1160,6 @@ st.caption("DocForge Hub · Powered by AI")
 
 #     current_combo   = f"{selected_dept}||{selected_template}"
 #     current_company = company_sig(st.session_state.get("company"))
-
 #     combo_changed   = st.session_state.get("_loaded_combo") != current_combo
 #     company_changed = (
 #         st.session_state.get("_loaded_company") != current_company
@@ -1156,8 +1169,8 @@ st.caption("DocForge Hub · Powered by AI")
 #     if not combo_changed and not company_changed:
 #         return
 
-#     with st.spinner("Loading form fields…"):
-#         data, err = api_post(
+#     with st.spinner("Loading form…"):
+#         data, _err = api_post(
 #             "/generate/questions",
 #             {
 #                 "document_type_id": tmpl_map.get(selected_template),
@@ -1189,7 +1202,7 @@ st.caption("DocForge Hub · Powered by AI")
 # # MAIN TABS
 # # ═══════════════════════════════════════════════════════
 
-# tab_generate, tab_library = st.tabs(["✍️  Generate", "📚  Document Library"])
+# tab_generate, tab_library = st.tabs(["  Generate  ", "  Document Library  "])
 
 
 # # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1198,66 +1211,96 @@ st.caption("DocForge Hub · Powered by AI")
 
 # with tab_generate:
 
-#     # ── Nothing selected yet ──────────────────────────
-#     if not selected_dept or not selected_template:
-#         st.info("👆 Select a **Department** and **Document Type** above to get started.")
-#         st.stop()
-
 #     doc     = st.session_state.get("document")
 #     preview = st.session_state.get("preview_content")
 
-#     # ── Loading / no form yet ─────────────────────────
 #     if not st.session_state.get("sections") and not doc:
-#         st.info("Loading form…")
-#         st.stop()
+#         st.info("Loading form fields… if this persists, check the backend is running.")
 
-#     form_col, doc_col = st.columns([1, 2], gap="large")
+#     else:
+#         form_col, doc_col = st.columns([1, 2], gap="large")
 
-#     # ════════════════════════════════════════
-#     # LEFT — Intake Form
-#     # ════════════════════════════════════════
-#     with form_col:
-#         st.markdown(f"### 📝 {selected_template}")
-#         st.caption(f"{selected_dept}  ·  Fill in the fields below")
-
-#         if st.session_state.get("sections"):
-#             answers = {}
-
-#             for section in st.session_state["sections"]:
-#                 fields = section.get("fields", [])
-#                 if not fields:
-#                     continue
-
-#                 with st.container(border=True):
-#                     st.markdown(f"**{section['section_name']}**")
-
-#                     for field in fields:
-#                         fn    = field["field_name"]
-#                         label = field["field_label"]
-#                         ftype = field["field_type"]
-
-#                         if ftype == "textarea":
-#                             answers[fn] = st.text_area(label, key=f"f_{fn}", height=80)
-#                         elif ftype == "date":
-#                             answers[fn] = str(st.date_input(label, key=f"f_{fn}"))
-#                         elif ftype == "number":
-#                             answers[fn] = str(st.number_input(label, key=f"f_{fn}", step=1))
-#                         else:
-#                             answers[fn] = st.text_input(label, key=f"f_{fn}")
-
-#             st.session_state["answers"] = answers
-
+#         # ════════════════════════════════════════
+#         # LEFT — Intake Form
+#         # ════════════════════════════════════════
+#         with form_col:
+#             st.markdown(f"### {selected_template or 'Document'}")
+#             st.caption(selected_dept or "")
 #             st.write("")
-#             gen_col1, gen_col2 = st.columns(2)
 
-#             with gen_col1:
-#                 if st.button(
-#                     "⚡ Generate Document",
-#                     type="primary",
-#                     use_container_width=True,
-#                     key="gen_doc_btn",
-#                 ):
-#                     with st.spinner("Generating document… this may take a moment"):
+#             if st.session_state.get("sections"):
+#                 answers = {}
+
+#                 # ── Action buttons at TOP — visible without scrolling ──
+#                 top1, top2 = st.columns(2)
+#                 with top1:
+#                     gen_top = st.button(
+#                         "Generate Document",
+#                         type="primary",
+#                         use_container_width=True,
+#                         key="gen_top",
+#                     )
+#                 with top2:
+#                     prev_top = st.button(
+#                         "Preview",
+#                         use_container_width=True,
+#                         key="prev_top",
+#                     )
+
+#                 st.divider()
+
+#                 # ── Section field cards ──
+#                 for section in st.session_state["sections"]:
+#                     fields = section.get("fields", [])
+#                     if not fields:
+#                         continue
+
+#                     with st.container(border=True):
+#                         st.markdown(f"**{section['section_name']}**")
+#                         st.write("")
+
+#                         for field in fields:
+#                             fn    = field["field_name"]
+#                             label = field["field_label"]
+#                             ftype = field["field_type"]
+
+#                             if ftype == "textarea":
+#                                 answers[fn] = st.text_area(
+#                                     label, key=f"f_{fn}", height=80,
+#                                 )
+#                             elif ftype == "date":
+#                                 answers[fn] = str(
+#                                     st.date_input(label, key=f"f_{fn}")
+#                                 )
+#                             elif ftype == "number":
+#                                 answers[fn] = str(
+#                                     st.number_input(label, key=f"f_{fn}", step=1)
+#                                 )
+#                             else:
+#                                 answers[fn] = st.text_input(label, key=f"f_{fn}")
+
+#                 st.session_state["answers"] = answers
+
+#                 # ── Action buttons at BOTTOM — convenience for long forms ──
+#                 st.divider()
+#                 bot1, bot2 = st.columns(2)
+#                 with bot1:
+#                     gen_bot = st.button(
+#                         "Generate Document",
+#                         type="primary",
+#                         use_container_width=True,
+#                         key="gen_bot",
+#                     )
+#                 with bot2:
+#                     prev_bot = st.button(
+#                         "Preview",
+#                         use_container_width=True,
+#                         key="prev_bot",
+#                     )
+
+#                 # ── Handle button triggers ──
+#                 if gen_top or gen_bot:
+#                     with st.spinner("Generating document…"):
 #                         data, err = api_post(
 #                             "/generate/document",
 #                             {
@@ -1268,7 +1311,7 @@ st.caption("DocForge Hub · Powered by AI")
 #                             },
 #                         )
 #                         if data:
-#                             st.session_state["document"]       = data
+#                             st.session_state["document"]        = data
 #                             st.session_state["preview_content"] = None
 #                             if data.get("session_id"):
 #                                 st.session_state["session_id"] = data["session_id"]
@@ -1276,12 +1319,7 @@ st.caption("DocForge Hub · Powered by AI")
 #                         else:
 #                             st.error(f"Generation failed: {err}")
 
-#             with gen_col2:
-#                 if st.button(
-#                     "👁 Preview",
-#                     use_container_width=True,
-#                     key="prev_btn",
-#                 ):
+#                 if prev_top or prev_bot:
 #                     with st.spinner("Generating preview…"):
 #                         pdata, _ = api_post(
 #                             "/generate/preview",
@@ -1297,166 +1335,183 @@ st.caption("DocForge Hub · Powered by AI")
 #                             st.session_state["document"]        = None
 #                             st.rerun()
 
-#     # ════════════════════════════════════════
-#     # RIGHT — Document Output
-#     # ════════════════════════════════════════
-#     with doc_col:
+#         # ════════════════════════════════════════
+#         # RIGHT — Document Output
+#         # ════════════════════════════════════════
+#         with doc_col:
 
-#         if not doc and not preview:
-#             with st.container(border=True):
-#                 st.markdown("### Your document will appear here")
-#                 st.caption(
-#                     "Fill in the form on the left and click **⚡ Generate Document** "
-#                     "to create your document."
-#                 )
-#                 st.write("")
+#             if not doc and not preview:
+#                 with st.container(border=True):
+#                     st.markdown("#### Your document will appear here")
+#                     st.caption(
+#                         "Fill in the form and click **Generate Document**."
+#                     )
+#                     st.write("")
+#                     st.markdown(
+#                         "- AI generates all sections from your inputs\n"
+#                         "- Rewrite any section individually\n"
+#                         "- Download as PDF or DOCX\n"
+#                         "- Publish to Notion"
+#                     )
+
+#             elif preview:
+#                 st.info("Preview mode — not saved to library.")
 #                 st.markdown(
-#                     "**What happens next:**\n"
-#                     "- AI generates all sections from your inputs\n"
-#                     "- You can rewrite any section individually\n"
-#                     "- Download as PDF or DOCX when ready\n"
-#                     "- Publish directly to Notion"
+#                     f"## {st.session_state.get('template_name', 'Preview')}"
 #                 )
+#                 st.divider()
+#                 render_plain(preview)
 
-#         elif preview:
-#             st.info("👁 Preview mode — this document has not been saved.")
-#             st.markdown(f"## {st.session_state.get('template_name', 'Preview')}")
-#             st.divider()
-#             render_plain(preview)
+#             elif doc:
+#                 sections   = get_sections(doc)
+#                 doc_title  = doc.get("title", selected_template or "Document")
+#                 company    = st.session_state.get("company")
+#                 dept_name  = st.session_state.get("department_name", "")
+#                 val_status = doc.get("validation_status", "pending")
 
-#         elif doc:
-#             sections  = get_sections(doc)
-#             doc_title = doc.get("title", selected_template or "Document")
-#             company   = st.session_state.get("company")
-#             dept_name = st.session_state.get("department_name", "")
-#             val_status = doc.get("validation_status", "pending")
+#                 # ── Document header ──
+#                 st.markdown(f"## {doc_title}")
 
-#             # ── Document header ──────────────────────
-#             st.markdown(f"## {doc_title}")
+#                 m1, m2, m3 = st.columns(3)
+#                 m1.metric("Status",  status_display(val_status))
+#                 m2.metric("Version", f"v{doc.get('version', '1.0')}")
+#                 m3.metric("Doc ID",  str(doc.get("document_id", "—")))
 
-#             m1, m2, m3 = st.columns(3)
-#             m1.metric("Status",  status_display(val_status))
-#             m2.metric("Version", f"v{doc.get('version', '1.0')}")
-#             m3.metric("Doc ID",  str(doc.get("document_id", "—")))
+#                 st.divider()
 
-#             st.divider()
+#                 # ── Action bar — 3 equal columns, no ghost column ──
+#                 act1, act2, act3 = st.columns(3)
 
-#             # ── Action bar ───────────────────────────
-#             a1, a2, a3, a4 = st.columns(4)
-
-#             with a2:
-#                 if sections:
-#                     pdf_bytes = fetch_pdf(doc["document_id"], company)
-#                     if pdf_bytes:
+#                 with act1:
+#                     pdf_b = fetch_pdf(doc["document_id"], company)
+#                     if pdf_b:
 #                         st.download_button(
-#                             "📄 Download PDF", data=pdf_bytes,
+#                             "⬇ Download PDF",
+#                             data=pdf_b,
 #                             file_name=f"{doc_title}.pdf",
 #                             mime="application/pdf",
-#                             use_container_width=True, key="dl_pdf",
+#                             use_container_width=True,
+#                             key="gen_dl_pdf",
 #                         )
 #                     else:
-#                         st.button("📄 Download PDF", disabled=True,
-#                                   use_container_width=True, key="dl_pdf_d")
-#                 else:
-#                     st.button("📄 Download PDF", disabled=True,
-#                               use_container_width=True, key="dl_pdf_d2")
+#                         st.button(
+#                             "⬇ Download PDF",
+#                             disabled=True,
+#                             use_container_width=True,
+#                             key="gen_dl_pdf_d",
+#                         )
 
-#             with a3:
-#                 if sections:
-#                     docx_bytes = make_docx(sections, doc_title, company, dept_name)
-#                     if docx_bytes:
+#                 with act2:
+#                     docx_b = fetch_docx(doc["document_id"], company)
+#                     if docx_b:
 #                         st.download_button(
-#                             "📝 Download DOCX", data=docx_bytes,
+#                             "⬇ Download DOCX",
+#                             data=docx_b,
 #                             file_name=f"{doc_title}.docx",
 #                             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-#                             use_container_width=True, key="dl_docx",
+#                             use_container_width=True,
+#                             key="gen_dl_docx",
 #                         )
 #                     else:
-#                         st.button("📝 Download DOCX", disabled=True,
-#                                   use_container_width=True, key="dl_docx_d")
-#                 else:
-#                     st.button("📝 Download DOCX", disabled=True,
-#                               use_container_width=True, key="dl_docx_d2")
-
-#             with a4:
-#                 if st.button(
-#                     "🔗 Publish to Notion",
-#                     use_container_width=True,
-#                     key="notion_btn",
-#                 ):
-#                     with st.spinner("Publishing to Notion…"):
-#                         ndata, nerr = api_post(
-#                             "/notion/publish",
-#                             {"document_id": doc["document_id"]},
+#                         st.button(
+#                             "⬇ Download DOCX",
+#                             disabled=True,
+#                             use_container_width=True,
+#                             key="gen_dl_docx_d",
 #                         )
-#                         if ndata:
-#                             st.success(
-#                                 f"✅ Published — [Open in Notion]({ndata.get('notion_url', '')})"
+
+#                 with act3:
+#                     if st.button(
+#                         "Publish to Notion",
+#                         use_container_width=True,
+#                         key="notion_gen",
+#                     ):
+#                         with st.spinner("Publishing…"):
+#                             ndata, nerr = api_post(
+#                                 "/notion/publish",
+#                                 {"document_id": doc["document_id"]},
 #                             )
-#                         else:
-#                             st.error(f"Notion error: {nerr}")
-
-#             st.divider()
-
-#             # ── Section-by-section rendering with inline regen ──
-#             if sections:
-#                 for section in sections:
-#                     heading = section.get("heading", "")
-#                     if not heading:
-#                         continue
-
-#                     with st.container(border=True):
-#                         sec_h, sec_btn = st.columns([5, 1])
-
-#                         with sec_h:
-#                             st.markdown(f"#### {heading}")
-
-#                         with sec_btn:
-#                             # Inline rewrite trigger via popover
-#                             with st.popover("✏️ Rewrite", use_container_width=True):
-#                                 st.markdown(f"**Rewrite: {heading}**")
-#                                 feedback = st.text_area(
-#                                     "Instructions (optional)",
-#                                     placeholder="e.g. Make it more formal, add more detail…",
-#                                     key=f"fb_{heading[:30]}",
-#                                     height=80,
+#                             if ndata:
+#                                 st.success(
+#                                     f"Published — "
+#                                     f"[Open in Notion]({ndata.get('notion_url', '')})"
 #                                 )
-#                                 if st.button(
-#                                     "↻ Regenerate",
-#                                     key=f"regen_{heading[:30].replace(' ', '_')}",
-#                                     type="primary",
-#                                     use_container_width=True,
-#                                 ):
-#                                     with st.spinner(f"Rewriting '{heading}'…"):
-#                                         result, err = api_post(
-#                                             "/generate/section",
-#                                             {
-#                                                 "document_id":  doc["document_id"],
-#                                                 "section_name": heading,
-#                                                 "answers":      st.session_state.get("answers", {}),
-#                                                 "feedback":     feedback or None,
-#                                                 "company":      st.session_state.get("company"),
-#                                             },
-#                                         )
-#                                     if result:
-#                                         updated = api_get(
-#                                             f"/documents/{doc['document_id']}",
-#                                             show_error=False,
-#                                         )
-#                                         if updated:
-#                                             st.session_state["document"] = updated
-#                                             st.rerun()
-#                                     else:
-#                                         st.error(f"Rewrite failed: {err}")
+#                             else:
+#                                 st.error(f"Notion error: {nerr}")
 
-#                         render_section_content(section)
+#                 st.divider()
 
-#             else:
-#                 render_plain(doc.get("content", ""))
+#                 # ── Sections with inline Rewrite ──
+#                 if sections:
+#                     for section in sections:
+#                         heading = section.get("heading", "")
+#                         if not heading:
+#                             continue
+
+#                         with st.container(border=True):
+#                             h_col, btn_col = st.columns([5, 1])
+
+#                             with h_col:
+#                                 st.markdown(f"#### {heading}")
+
+#                             with btn_col:
+#                                 rkey = (
+#                                     heading[:28]
+#                                     .replace(" ", "_")
+#                                     .replace("/", "_")
+#                                     .replace("(", "")
+#                                     .replace(")", "")
+#                                 )
+#                                 with st.popover("Rewrite", use_container_width=True):
+#                                     st.markdown(f"**{heading}**")
+#                                     feedback = st.text_area(
+#                                         "Instructions (optional)",
+#                                         placeholder="e.g. More formal, add more detail…",
+#                                         key=f"fb_{rkey}",
+#                                         height=80,
+#                                     )
+#                                     if st.button(
+#                                         "Regenerate",
+#                                         key=f"regen_{rkey}",
+#                                         type="primary",
+#                                         use_container_width=True,
+#                                     ):
+#                                         with st.spinner(f"Rewriting '{heading}'…"):
+#                                             result, err = api_post(
+#                                                 "/generate/section",
+#                                                 {
+#                                                     "document_id":  doc["document_id"],
+#                                                     "section_name": heading,
+#                                                     "answers":      st.session_state.get("answers", {}),
+#                                                     "feedback":     feedback or None,
+#                                                     "company":      st.session_state.get("company"),
+#                                                 },
+#                                             )
+#                                         if result:
+#                                             updated = api_get(
+#                                                 f"/documents/{doc['document_id']}",
+#                                                 show_error=False,
+#                                             )
+#                                             if updated:
+#                                                 st.session_state["document"] = updated
+#                                                 st.rerun()
+#                                         else:
+#                                             st.error(f"Rewrite failed: {err}")
+
+#                             render_section_content(section)
+
+#                 else:
+#                     render_plain(doc.get("content", ""))
 
 
 # # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # # TAB 2 — DOCUMENT LIBRARY
+# #
+# # Conditional rendering — no st.stop() inside a tab block.
+# #
+# # Single doc view  → section reading ONLY. No download buttons.
+# #                    Downloads are on the list card for each document.
+# # Library list     → View | PDF | DOCX | Delete per card.
 # # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # with tab_library:
@@ -1465,12 +1520,12 @@ st.caption("DocForge Hub · Powered by AI")
 #     if st.session_state.get("library_doc"):
 #         lib_doc   = st.session_state["library_doc"]
 #         lib_title = lib_doc.get("title", "Document")
-#         company   = st.session_state.get("company")
 #         sections  = get_sections(lib_doc)
 
-#         back_col, title_col = st.columns([1, 6])
+#         back_col, title_col = st.columns([1, 7])
+
 #         with back_col:
-#             if st.button("← Back", use_container_width=True):
+#             if st.button("← Back", use_container_width=True, key="lib_back"):
 #                 st.session_state["library_doc"] = None
 #                 st.rerun()
 
@@ -1484,31 +1539,8 @@ st.caption("DocForge Hub · Powered by AI")
 
 #         st.divider()
 
-#         # Download buttons
-#         dl1, dl2, _ = st.columns([1, 1, 5])
-#         with dl1:
-#             if sections:
-#                 pdf_b = make_pdf(sections, lib_title, company, "")
-#                 if pdf_b:
-#                     st.download_button(
-#                         "📄 PDF", data=pdf_b,
-#                         file_name=f"{lib_title}.pdf",
-#                         mime="application/pdf",
-#                         use_container_width=True,
-#                     )
-#         with dl2:
-#             if sections:
-#                 docx_b = make_docx(sections, lib_title, company, "")
-#                 if docx_b:
-#                     st.download_button(
-#                         "📝 DOCX", data=docx_b,
-#                         file_name=f"{lib_title}.docx",
-#                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-#                         use_container_width=True,
-#                     )
-
-#         st.write("")
-
+#         # Read-only section view — downloads intentionally absent here.
+#         # They are available on the library list card for this document.
 #         if sections:
 #             for section in sections:
 #                 heading = section.get("heading", "")
@@ -1519,157 +1551,166 @@ st.caption("DocForge Hub · Powered by AI")
 #         else:
 #             render_plain(lib_doc.get("content", ""))
 
-#         st.stop()
-
 #     # ── Library list view ─────────────────────────────
-#     st.markdown("### 📚 Document Library")
-#     st.caption("All generated documents · filter by department, type, or status")
-
-#     st.write("")
-
-#     # Filters
-#     f1, f2, f3 = st.columns(3)
-
-#     with f1:
-#         dept_data_lib    = api_get("/departments", show_error=False) or []
-#         dept_filter_map  = {d["name"]: d["id"] for d in dept_data_lib}
-#         filter_dept      = st.selectbox(
-#             "Filter by Department",
-#             ["All Departments"] + [d["name"] for d in dept_data_lib],
-#             key="lib_dept_f",
-#         )
-
-#     with f2:
-#         tmpl_lib = []
-#         if filter_dept != "All Departments":
-#             tmpl_lib = api_get(f"/templates/{dept_filter_map[filter_dept]}", show_error=False) or []
-#         else:
-#             for d in dept_data_lib:
-#                 tmpl_lib.extend(api_get(f"/templates/{d['id']}", show_error=False) or [])
-#         tmpl_lib_disp = {short_name(t["name"]): t["id"] for t in tmpl_lib}
-#         filter_tmpl   = st.selectbox(
-#             "Filter by Document Type",
-#             ["All Document Types"] + list(tmpl_lib_disp.keys()),
-#             key="lib_tmpl_f",
-#         )
-
-#     with f3:
-#         filter_status = st.selectbox(
-#             "Filter by Status",
-#             ["All", "validated", "pending", "needs_review", "failed"],
-#             key="lib_status_f",
-#         )
-
-#     st.divider()
-
-#     # Fetch docs
-#     params = {}
-#     if filter_dept != "All Departments":
-#         params["department_id"] = dept_filter_map[filter_dept]
-#     if filter_tmpl != "All Document Types":
-#         params["template_id"] = tmpl_lib_disp.get(filter_tmpl)
-
-#     raw_docs = api_get("/documents", params=params, show_error=True)
-#     if raw_docs is None:
-#         st.warning("Could not load documents.")
-#         st.stop()
-
-#     docs = raw_docs or []
-#     if filter_status != "All":
-#         docs = [d for d in docs if d.get("validation_status") == filter_status]
-
-#     if not docs:
-#         st.info("📭 No documents found. Generate your first document to see it here.")
 #     else:
-#         company = st.session_state.get("company")
-#         st.caption(f"{len(docs)} document(s)")
-#         st.write("")
+#         st.markdown("### Document Library")
+#         st.divider()
 
-#         for doc in docs:
-#             title     = doc.get("title", "Untitled")
-#             val       = doc.get("validation_status", "pending")
-#             version   = doc.get("version", "1.0")
-#             created   = format_date(doc.get("created_at", ""))
-#             doc_id    = doc["document_id"]
-#             secs      = get_sections(doc)
+#         # Filters
+#         f1, f2, f3 = st.columns(3)
 
-#             with st.container(border=True):
-#                 info_col, act_col = st.columns([3, 2])
+#         with f1:
+#             dept_data_lib   = api_get("/departments", show_error=False) or []
+#             dept_filter_map = {d["name"]: d["id"] for d in dept_data_lib}
+#             filter_dept     = st.selectbox(
+#                 "Department",
+#                 ["All Departments"] + [d["name"] for d in dept_data_lib],
+#                 key="lib_dept_f",
+#             )
 
-#                 with info_col:
-#                     st.markdown(f"**{title}**")
-#                     st.caption(
-#                         f"v{version}  ·  {created}  ·  {status_display(val)}"
+#         with f2:
+#             tmpl_lib = []
+#             if filter_dept != "All Departments":
+#                 tmpl_lib = (
+#                     api_get(f"/templates/{dept_filter_map[filter_dept]}", show_error=False)
+#                     or []
+#                 )
+#             else:
+#                 for d in dept_data_lib:
+#                     tmpl_lib.extend(
+#                         api_get(f"/templates/{d['id']}", show_error=False) or []
 #                     )
+#             tmpl_lib_disp = {short_name(t["name"]): t["id"] for t in tmpl_lib}
+#             filter_tmpl   = st.selectbox(
+#                 "Document Type",
+#                 ["All Document Types"] + list(tmpl_lib_disp.keys()),
+#                 key="lib_tmpl_f",
+#             )
 
-#                 with act_col:
-#                     b1, b2, b3, b4 = st.columns(4)
+#         with f3:
+#             filter_status = st.selectbox(
+#                 "Status",
+#                 ["All", "validated", "pending", "needs_review", "failed"],
+#                 key="lib_status_f",
+#             )
 
-#                     with b1:
-#                         if st.button(
-#                             "View",
-#                             key=f"v_{doc_id}",
-#                             use_container_width=True,
-#                         ):
-#                             st.session_state["library_doc"] = doc
-#                             st.rerun()
+#         st.divider()
 
-#                     with b2:
-#                         if secs:
-#                             pdf_b = make_pdf(secs, title, company, "")
-#                             if pdf_b:
-#                                 st.download_button(
-#                                     "PDF", data=pdf_b,
-#                                     file_name=f"{title}.pdf",
-#                                     mime="application/pdf",
-#                                     use_container_width=True,
-#                                     key=f"pdf_{doc_id}",
-#                                 )
-#                             else:
-#                                 st.button("PDF", disabled=True,
-#                                           use_container_width=True, key=f"pdf_d_{doc_id}")
-#                         else:
-#                             st.button("PDF", disabled=True,
-#                                       use_container_width=True, key=f"pdf_d2_{doc_id}")
+#         params = {}
+#         if filter_dept != "All Departments":
+#             params["department_id"] = dept_filter_map[filter_dept]
+#         if filter_tmpl != "All Document Types":
+#             params["template_id"] = tmpl_lib_disp.get(filter_tmpl)
 
-#                     with b3:
-#                         if secs:
-#                             docx_b = make_docx(secs, title, company, "")
-#                             if docx_b:
-#                                 st.download_button(
-#                                     "DOCX", data=docx_b,
-#                                     file_name=f"{title}.docx",
-#                                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-#                                     use_container_width=True,
-#                                     key=f"docx_{doc_id}",
-#                                 )
-#                             else:
-#                                 st.button("DOCX", disabled=True,
-#                                           use_container_width=True, key=f"docx_d_{doc_id}")
-#                         else:
-#                             st.button("DOCX", disabled=True,
-#                                       use_container_width=True, key=f"docx_d2_{doc_id}")
+#         raw_docs = api_get("/documents", params=params, show_error=True)
 
-#                     with b4:
-#                         if st.button("🗑", key=f"del_{doc_id}", use_container_width=True):
-#                             if api_delete(f"/documents/{doc_id}"):
-#                                 st.success("Deleted.")
-#                                 st.rerun()
+#         if raw_docs is None:
+#             st.warning("Could not load documents.")
+#         else:
+#             docs = raw_docs or []
+#             if filter_status != "All":
+#                 docs = [d for d in docs if d.get("validation_status") == filter_status]
 
-#                 # Notion publish inline
-#                 with st.expander("🔗 Publish to Notion"):
-#                     if st.button(
-#                         "Publish this document",
-#                         key=f"notion_{doc_id}",
-#                     ):
-#                         with st.spinner("Publishing…"):
-#                             ndata, nerr = api_post(
-#                                 "/notion/publish",
-#                                 {"document_id": doc_id},
+#             if not docs:
+#                 st.info("No documents found. Generate your first document to see it here.")
+#             else:
+#                 company = st.session_state.get("company")
+#                 st.caption(f"{len(docs)} document(s)")
+#                 st.write("")
+
+#                 for doc in docs:
+#                     title   = doc.get("title", "Untitled")
+#                     val     = doc.get("validation_status", "pending")
+#                     version = doc.get("version", "1.0")
+#                     created = format_date(doc.get("created_at", ""))
+#                     doc_id  = doc["document_id"]
+#                     secs    = get_sections(doc)
+
+#                     with st.container(border=True):
+#                         info_col, act_col = st.columns([2, 3])
+
+#                         with info_col:
+#                             st.markdown(f"**{title}**")
+#                             st.caption(
+#                                 f"v{version}  ·  {created}  ·  {status_display(val)}"
 #                             )
-#                             if ndata:
-#                                 st.success(
-#                                     f"✅ Published — [Open in Notion]({ndata.get('notion_url', '')})"
-#                                 )
-#                             else:
-#                                 st.error(f"Error: {nerr}")
+
+#                         with act_col:
+#                             # 4 action buttons — View | PDF | DOCX | Delete
+#                             b_view, b_pdf, b_docx, b_del = st.columns(4)
+
+#                             with b_view:
+#                                 if st.button(
+#                                     "View",
+#                                     key=f"v_{doc_id}",
+#                                     use_container_width=True,
+#                                 ):
+#                                     st.session_state["library_doc"] = doc
+#                                     st.rerun()
+
+#                             with b_pdf:
+#                                 pdf_b = fetch_pdf(doc_id, company) if secs else None
+#                                 if pdf_b:
+#                                     st.download_button(
+#                                         "PDF",
+#                                         data=pdf_b,
+#                                         file_name=f"{title}.pdf",
+#                                         mime="application/pdf",
+#                                         use_container_width=True,
+#                                         key=f"pdf_{doc_id}",
+#                                     )
+#                                 else:
+#                                     st.button(
+#                                         "PDF",
+#                                         disabled=True,
+#                                         use_container_width=True,
+#                                         key=f"pdf_d_{doc_id}",
+#                                     )
+
+#                             with b_docx:
+#                                 docx_b = fetch_docx(doc_id, company) if secs else None
+#                                 if docx_b:
+#                                     st.download_button(
+#                                         "DOCX",
+#                                         data=docx_b,
+#                                         file_name=f"{title}.docx",
+#                                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+#                                         use_container_width=True,
+#                                         key=f"docx_{doc_id}",
+#                                     )
+#                                 else:
+#                                     st.button(
+#                                         "DOCX",
+#                                         disabled=True,
+#                                         use_container_width=True,
+#                                         key=f"docx_d_{doc_id}",
+#                                     )
+
+#                             with b_del:
+#                                 if st.button(
+#                                     "Delete",
+#                                     key=f"del_{doc_id}",
+#                                     use_container_width=True,
+#                                 ):
+#                                     if api_delete(f"/documents/{doc_id}"):
+#                                         st.success("Deleted.")
+#                                         st.rerun()
+
+#                         # Notion — collapsed per card, doesn't clutter the row
+#                         with st.expander("Publish to Notion"):
+#                             if st.button(
+#                                 "Publish this document",
+#                                 key=f"notion_{doc_id}",
+#                             ):
+#                                 with st.spinner("Publishing…"):
+#                                     ndata, nerr = api_post(
+#                                         "/notion/publish",
+#                                         {"document_id": doc_id},
+#                                     )
+#                                     if ndata:
+#                                         st.success(
+#                                             f"Published — "
+#                                             f"[Open in Notion]({ndata.get('notion_url', '')})"
+#                                         )
+#                                     else:
+#                                         st.error(f"Error: {nerr}")

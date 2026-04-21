@@ -115,8 +115,6 @@ _ROLE_INSTRUCTIONS: dict[str, str] = {
 # TEXT HELPERS (thin wrappers for local convenience)
 # ═══════════════════════════════════════════════════════
 
-def _answers_context(answers: dict) -> str:
-    return format_answers(answers)
 
 
 def _parse_text_to_table_rows(text: str) -> list:
