@@ -92,7 +92,7 @@ class GeneratedDocumentResponse(BaseModel):
     session_id: Optional[UUID] = None
     title: str = ""
     content: str = ""
-    structured_json: Optional[str] = None  # always str — never dict
+    structured_json: Optional[str] = None 
     version: str = "1.0"
     validation_status: Optional[str] = "pending"
     validation_notes: Optional[str] = None
@@ -179,7 +179,7 @@ class ValidateDocumentResponse(BaseModel):
     table_issues: List[str] = []
     grounding_issues: List[str] = []
     placeholder_issues: List[str] = []
-    llm_judge_result: Optional[Dict[str, Any]] = None
+    # llm_judge_result: Optional[Dict[str, Any]] = None
 
     class Config:
         from_attributes = True
@@ -203,7 +203,7 @@ class ValidationResponse(BaseModel):
     table_issues: List[str]
     grounding_issues: List[str]
     placeholder_issues: List[str]
-    llm_judge_result: Optional[dict] = None
+    # llm_judge_result: Optional[dict] = None
 
 # ─────────────────────────────────────────
 # REGENERATE DOCUMENT SCHEMAS
@@ -213,6 +213,7 @@ class RegenerateDocumentRequest(BaseModel):
     session_id: UUID
     answers: Optional[Dict[str, str]] = None
     feedback: Optional[str] = None
+    company: Optional[Dict[str, str]] = None 
   
 
 # ─────────────────────────────────────────
@@ -223,6 +224,7 @@ class PreviewDocumentRequest(BaseModel):
     department_id: int
     template_id: int
     answers: Dict[str, str]
+    company: Optional[Dict[str, str]] = None  
 
 
 class PreviewDocumentResponse(BaseModel):
@@ -257,6 +259,7 @@ class RegenerateSectionRequest(BaseModel):
     section_name: str
     answers: Optional[Dict[str, str]] = None
     feedback: Optional[str] = None
+    company: Optional[Dict[str, str]] = None  
 
 
 class RegenerateSectionResponse(BaseModel):

@@ -73,7 +73,7 @@ class GeneratedDocument(Base):
     template_id = Column(Integer, ForeignKey("document_templates.id"), nullable=False)
     title = Column(String(255))
     content = Column(Text, nullable=False)
-    structured_json = Column(Text, nullable=True)  # Text not JSONB — always string
+    structured_json = Column(Text, nullable=True)  
     version = Column(String(20), default="1.0")
     validation_status = Column(String(50), default="pending")
     validation_notes = Column(Text, nullable=True)

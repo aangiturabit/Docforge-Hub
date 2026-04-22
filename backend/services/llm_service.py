@@ -1,13 +1,11 @@
 
-
-import hashlib
 import json
 import os
 import time
 
 from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage, SystemMessage  
 from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import AzureChatOpenAI
 
 from backend.utils.logger import get_logger
@@ -16,11 +14,10 @@ load_dotenv()
 
 logger = get_logger("docforge.services.llm")
 
-# ── Max tokens — configurable so large structured docs are never truncated ────
 _MAX_TOKENS = int(os.getenv("LLM_MAX_TOKENS", "8000"))
 
-# ── LLM instances ─────────────────────────────────────────────────────────────
-_llm_text = AzureChatOpenAI(
+# ── Single LLM instance ───────────────────────────────────────────────────────
+_llm = AzureChatOpenAI(
     azure_deployment=os.getenv("AZURE_LLM_DEPLOYMENT_41_MINI"),
     azure_endpoint=os.getenv("AZURE_LLM_ENDPOINT"),
     api_key=os.getenv("AZURE_OPENAI_LLM_KEY"),
@@ -28,6 +25,7 @@ _llm_text = AzureChatOpenAI(
     temperature=0.2,
     max_tokens=_MAX_TOKENS,
 )
+
 
 _llm_json = AzureChatOpenAI(
     azure_deployment=os.getenv("AZURE_LLM_DEPLOYMENT_41_MINI"),
@@ -39,25 +37,20 @@ _llm_json = AzureChatOpenAI(
     model_kwargs={"response_format": {"type": "json_object"}},
 )
 
-# ── In-memory cache ───────────────────────────────────────────────────────────
-_llm_cache: dict = {}
 
-
-def _cache_key(mode: str, system: str, prompt: str) -> str:
-    return hashlib.md5(f"{mode}:{system}:{prompt}".encode()).hexdigest()
-
+# ═══════════════════════════════════════════════════════
+# INTERNAL HELPERS
+# ═══════════════════════════════════════════════════════
 
 def _build_messages(system: str, prompt: str) -> list:
-    """Build LangChain message list from system + human strings."""
-    template = ChatPromptTemplate.from_messages([
-        ("system", "{system}"),
-        ("human",  "{prompt}"),
-    ])
-    return template.format_messages(system=system, prompt=prompt)
+  
+    return [
+        SystemMessage(content=system),
+        HumanMessage(content=prompt),
+    ]
 
 
 def _strip_markdown_fences(raw: str) -> str:
-    """Remove ```json ... ``` or ``` ... ``` wrappers if present."""
     raw = raw.strip()
     if raw.startswith("```json"):
         raw = raw.split("```json", 1)[1].split("```", 1)[0].strip()
@@ -67,8 +60,15 @@ def _strip_markdown_fences(raw: str) -> str:
 
 
 # ═══════════════════════════════════════════════════════
-# PLAIN TEXT GENERATION
+# PLAIN TEXT GENERATION  (preview, section content, fallback)
 # ═══════════════════════════════════════════════════════
+
+_DEFAULT_TEXT_SYSTEM = (
+    "You are a professional business document writer for a SaaS company. "
+    "Generate complete, well-structured, professional document content. "
+    "Return ONLY the document content — no commentary, no explanations, no markdown."
+)
+
 
 def generate_with_llm(
     prompt: str,
@@ -77,72 +77,70 @@ def generate_with_llm(
     """
     Generate plain text (documents, previews, section content).
     Returns the raw text string.
-    Raises RuntimeError on failure — caller decides how to handle.
+    Raises RuntimeError on failure.
     """
-    system = system_prompt or (
-        "You are a professional business document writer for a SaaS company. "
-        "Generate complete, well-structured, professional documents. "
-        "Return ONLY the document content — no commentary, no explanations."
-    )
-
-    key = _cache_key("text", system, prompt)
-    if key in _llm_cache:
-        logger.debug("generate_with_llm: cache hit | key=%s", key[:8])
-        return _llm_cache[key]
-
-    logger.info("generate_with_llm: calling LLM | prompt_len=%d", len(prompt))
-    logger.debug("generate_with_llm: system=%s…", system[:120])
-    logger.debug("generate_with_llm: prompt=%s…", prompt[:300])
-
+    system   = system_prompt or _DEFAULT_TEXT_SYSTEM
     messages = _build_messages(system, prompt)
     t0       = time.monotonic()
 
+    logger.info("generate_with_llm | prompt_len=%d", len(prompt))
+    logger.debug("generate_with_llm | system=%s…", system[:120])
+
+    # ── Attempt 1 ─────────────────────────────────────────────────────────────
     try:
-        response = _llm_text.invoke(messages)
-        content  = response.content
+        response = _llm.invoke(messages)
+        content  = (response.content or "").strip()
 
-        if not content or not content.strip():
+        if not content:
             raise RuntimeError("LLM returned empty response")
-
-        content = content.strip()
-        elapsed = time.monotonic() - t0
 
         logger.info(
             "generate_with_llm: success | chars=%d elapsed=%.1fs",
-            len(content), elapsed,
+            len(content), time.monotonic() - t0,
         )
-
-        _llm_cache[key] = content
         return content
 
     except Exception as exc:
+        logger.warning("generate_with_llm: attempt 1 failed (%s) — retrying", exc)
+
+    # ── Attempt 2 ─────────────────────────────────────────────────────────────
+    try:
+        retry_messages = _build_messages(system, prompt + "\n\nGenerate the complete document content now.")
+        response = _llm.invoke(retry_messages)
+        content  = (response.content or "").strip()
+
+        if not content:
+            raise RuntimeError("LLM returned empty response on retry")
+
+        logger.info(
+            "generate_with_llm: retry success | chars=%d elapsed=%.1fs",
+            len(content), time.monotonic() - t0,
+        )
+        return content
+
+    except Exception as retry_exc:
         elapsed = time.monotonic() - t0
-        logger.error("generate_with_llm: failed after %.1fs — %s", elapsed, exc)
-        raise RuntimeError(f"LLM text generation failed: {exc}") from exc
+        logger.error("generate_with_llm: both attempts failed after %.1fs — %s", elapsed, retry_exc)
+        raise RuntimeError(f"LLM text generation failed: {retry_exc}") from retry_exc
 
 
 # ═══════════════════════════════════════════════════════
-# JSON GENERATION  
+# JSON GENERATION  (question forms, custom JSON payloads)
 # ═══════════════════════════════════════════════════════
 
 def generate_with_llm_json(
     user_prompt: str,
     system_prompt: str,
 ) -> str:
-   
+    
     if not system_prompt:
         raise ValueError("system_prompt is required for JSON generation")
-
-    key = _cache_key("json", system_prompt, user_prompt)
-    if key in _llm_cache:
-        logger.debug("generate_with_llm_json: cache hit | key=%s", key[:8])
-        return _llm_cache[key]
-
-    logger.info("generate_with_llm_json: calling LLM | prompt_len=%d", len(user_prompt))
 
     parser   = JsonOutputParser()
     messages = _build_messages(system_prompt, user_prompt)
     t0       = time.monotonic()
+
+    logger.info("generate_with_llm_json | prompt_len=%d", len(user_prompt))
 
     # ── Attempt 1 ─────────────────────────────────────────────────────────────
     try:
@@ -152,68 +150,56 @@ def generate_with_llm_json(
         if not raw:
             raise ValueError("LLM returned empty JSON response")
 
-        parsed  = parser.parse(raw)
-        content = json.dumps(parsed)
-        elapsed = time.monotonic() - t0
-
-        logger.info("generate_with_llm_json: success | elapsed=%.1fs", elapsed)
-        _llm_cache[key] = content
+        content = json.dumps(parser.parse(raw))
+        logger.info("generate_with_llm_json: success | elapsed=%.1fs", time.monotonic() - t0)
         return content
 
     except Exception as first_exc:
-        logger.warning(
-            "generate_with_llm_json: attempt 1 failed (%s) — retrying", first_exc
-        )
+        logger.warning("generate_with_llm_json: attempt 1 failed (%s) — retrying", first_exc)
 
-    # ── Attempt 2 — explicit JSON reminder ────────────────────────────────────
-    retry_prompt    = user_prompt + "\n\nReturn ONLY valid JSON — nothing else."
-    retry_messages  = _build_messages(system_prompt, retry_prompt)
-
+    # ── Attempt 2 ─────────────────────────────────────────────────────────────
     try:
+        retry_messages = _build_messages(
+            system_prompt,
+            user_prompt + "\n\nReturn ONLY valid JSON — nothing else.",
+        )
         response = _llm_json.invoke(retry_messages)
         raw      = _strip_markdown_fences(response.content or "")
 
         if not raw:
             raise ValueError("LLM returned empty JSON on retry")
 
-        parsed  = parser.parse(raw)
-        content = json.dumps(parsed)
-        elapsed = time.monotonic() - t0
-
-        logger.info("generate_with_llm_json: retry succeeded | elapsed=%.1fs", elapsed)
-        _llm_cache[key] = content
+        content = json.dumps(parser.parse(raw))
+        logger.info(
+            "generate_with_llm_json: retry success | elapsed=%.1fs", time.monotonic() - t0
+        )
         return content
 
     except Exception as retry_exc:
         elapsed = time.monotonic() - t0
         logger.error(
-            "generate_with_llm_json: both attempts failed after %.1fs — %s",
-            elapsed, retry_exc,
+            "generate_with_llm_json: both attempts failed after %.1fs — %s", elapsed, retry_exc
         )
         raise RuntimeError(f"JSON generation failed after retry: {retry_exc}") from retry_exc
 
 
 # ═══════════════════════════════════════════════════════
-# STRUCTURED DOCUMENT GENERATION  
+# STRUCTURED DOCUMENT GENERATION  (
 # ═══════════════════════════════════════════════════════
 
 def generate_structured_document(
     system_prompt: str,
     user_prompt: str,
 ) -> dict:
-  
-    key = _cache_key("structured", system_prompt, user_prompt)
-    if key in _llm_cache:
-        logger.debug("generate_structured_document: cache hit | key=%s", key[:8])
-        return _llm_cache[key]
-
-    logger.info(
-        "generate_structured_document: calling LLM | prompt_len=%d", len(user_prompt)
-    )
-
+    """
+    Generate a structured document as a Python dict.
+    Raises RuntimeError on failure.
+    """
     parser   = JsonOutputParser()
     messages = _build_messages(system_prompt, user_prompt)
     t0       = time.monotonic()
+
+    logger.info("generate_structured_document | prompt_len=%d", len(user_prompt))
 
     # ── Attempt 1 ─────────────────────────────────────────────────────────────
     try:
@@ -224,18 +210,13 @@ def generate_structured_document(
             raise ValueError("LLM returned empty structured response")
 
         result = parser.parse(raw)
-
         if not isinstance(result, dict):
             raise TypeError(f"Expected dict, got {type(result).__name__}")
 
-        elapsed = time.monotonic() - t0
-        sections = len(result.get("sections", []))
         logger.info(
             "generate_structured_document: success | sections=%d elapsed=%.1fs",
-            sections, elapsed,
+            len(result.get("sections", [])), time.monotonic() - t0,
         )
-
-        _llm_cache[key] = result
         return result
 
     except Exception as first_exc:
@@ -243,15 +224,14 @@ def generate_structured_document(
             "generate_structured_document: attempt 1 failed (%s) — retrying", first_exc
         )
 
-    # ── Attempt 2 — explicit JSON reminder ────────────────────────────────────
-    retry_prompt = (
-        user_prompt
-        + "\n\nCRITICAL: Return ONLY the JSON object. "
-        "No text before or after. No markdown. Pure JSON only."
-    )
-    retry_messages = _build_messages(system_prompt, retry_prompt)
-
+    # ── Attempt 2 ─────────────────────────────────────────────────────────────
     try:
+        retry_messages = _build_messages(
+            system_prompt,
+            user_prompt
+            + "\n\nCRITICAL: Return ONLY the JSON object. "
+            "No text before or after. No markdown. Pure JSON only.",
+        )
         response = _llm_json.invoke(retry_messages)
         raw      = _strip_markdown_fences(response.content or "")
 
@@ -259,18 +239,13 @@ def generate_structured_document(
             raise ValueError("LLM returned empty JSON on retry")
 
         result = parser.parse(raw)
-
         if not isinstance(result, dict):
             raise TypeError(f"Retry returned {type(result).__name__}, expected dict")
 
-        elapsed  = time.monotonic() - t0
-        sections = len(result.get("sections", []))
         logger.info(
-            "generate_structured_document: retry succeeded | sections=%d elapsed=%.1fs",
-            sections, elapsed,
+            "generate_structured_document: retry success | sections=%d elapsed=%.1fs",
+            len(result.get("sections", [])), time.monotonic() - t0,
         )
-
-        _llm_cache[key] = result
         return result
 
     except Exception as retry_exc:
