@@ -173,10 +173,10 @@ Today's date: {today}
 
 ABSOLUTE RULES — NEVER VIOLATE:
 1. NEVER use [brackets] — no [DATE], [NAME], [Amount], [Insert anything]
-2. Use exact values from the variable data provided
-3. NEVER write "Not Provided" — write a contextually appropriate phrase instead
+2. Use exact values from the variable data provided or fill with contextually appropriate content — do not invent details
+3. NEVER write "Not Provided" specially in any approval section  — write a contextually appropriate phrase instead 
 4. Use {today} for any date field not explicitly provided
-5. No ##, no **, no --, no markdown symbols in content
+5. No ##, no **, no --, no markdown symbols in content no table | cell text, no markdown lists — only clean plain text or structured JSON as specified in the output rules below
 6. UTF-8 safe characters only
 
 DOCUMENT CONTEXT:
@@ -212,6 +212,7 @@ CONTENT DEPTH:
 - BODY / OBLIGATION:     minimum 300 words, detailed
 - HEADER:                compact, 50-150 words, exact values only
 - SIGN_OFF:              formal block, 40-100 words max
+- Approval sections:     must include a clear call to action for approver according to the context, no placeholders or "Not Provided" text
 
 Return ONLY this JSON — no text before or after, no markdown:
 {{
@@ -243,6 +244,7 @@ FINAL CHECK — fix before outputting if any answer is no:
 - Zero [bracket] placeholders anywhere?
 - No "Not Provided" text anywhere?
 - Content substantive and professionally written?
+- Add details from variable data where possible according to section context, do not leave gaps or hallucination ?
 """
 
     # ── Plain text output ──────────────────────────────────────────────────────
@@ -251,8 +253,9 @@ FINAL CHECK — fix before outputting if any answer is no:
 SECTION DEPTH:
 - HEADER / SIGN_OFF:  compact, exact values only — 50-150 words
 - OPENER / CLOSURE:   minimum 200 words, 3-4 full paragraphs
-- BODY / OBLIGATION:  minimum 300 words, detailed and formal
-- TABLE sections:     real column headers + real data rows from provided values
+- BODY / OBLIGATION:  minimum 300 words, detailed and formal and professional
+- Approval sections:  must include a clear call to action for approver according to the context
+- TABLE sections:     real column headers + real data rows from provided values . never fill with or leave blank values or detail in a table .
 
 OUTPUT RULES:
 - Start directly with document content — no preamble
@@ -344,7 +347,7 @@ def build_regenerate_prompt(
 
 DOCUMENT_SYSTEM_PROMPT = (
     "You are DocForge, a professional document generation engine for B2B SaaS businesses. "
-    "Generate premium-quality, executive-ready plain-text documents. "
+    "Generate premium-quality,detailed comprehensive executive-ready plain-text documents. "
     "Today's date: {today}. "
     "Never use [brackets]. Never write 'Not Provided'. No markdown."
 )

@@ -5289,3 +5289,380 @@ AttributeError: module 'backend.services.document_service' has no attribute '_cl
 2026-04-22 19:18:32 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
 2026-04-22 19:18:32 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
 2026-04-22 19:18:32 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 14:36:22 [INFO    ] docforge.services.question get_form_structure:561 — get_form_structure | template_id=1
+2026-04-23 14:36:22 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Human Resources' template='Employee Handbook' sections=13
+2026-04-23 14:36:22 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=4088
+2026-04-23 14:36:27 [INFO    ] docforge.services.question get_form_structure:561 — get_form_structure | template_id=81
+2026-04-23 14:36:27 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Quality Assurance' template='Bug Report' sections=12
+2026-04-23 14:36:27 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=3019
+2026-04-23 14:36:30 [INFO    ] docforge.services.question get_form_structure:561 — get_form_structure | template_id=85
+2026-04-23 14:36:30 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Quality Assurance' template='Defect Management Process' sections=12
+2026-04-23 14:36:30 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=3198
+2026-04-23 14:36:38 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=15.4s
+2026-04-23 14:36:38 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 18 questions
+2026-04-23 14:36:38 [INFO    ] docforge.services.question get_form_structure:608 — get_form_structure complete | template=Employee Handbook dept=Human Resources sections=13
+2026-04-23 14:36:38 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=10.8s
+2026-04-23 14:36:38 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 12 questions
+2026-04-23 14:36:38 [INFO    ] docforge.services.question get_form_structure:608 — get_form_structure complete | template=Bug Report dept=Quality Assurance sections=12
+2026-04-23 14:36:41 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=11.6s
+2026-04-23 14:36:41 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 12 questions
+2026-04-23 14:36:41 [INFO    ] docforge.services.question get_form_structure:608 — get_form_structure complete | template=Defect Management Process dept=Quality Assurance sections=12
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 14:36:42 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 14:36:43 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 14:53:59 [INFO    ] docforge.services.document generate_structured_document:149 — generate_structured_document | template='Defect Management Process' dept='Quality Assurance'
+2026-04-23 14:53:59 [DEBUG   ] docforge.services.prompt build_unified_prompt:165 — build_unified_prompt | template='Defect Management Process' archetype=PLAN sections=12 structured=True
+2026-04-23 14:53:59 [INFO    ] docforge.services.llm generate_structured_document:202 — generate_structured_document | prompt_len=5677
+2026-04-23 14:54:49 [INFO    ] docforge.services.llm generate_structured_document:216 — generate_structured_document: success | sections=12 elapsed=50.2s
+2026-04-23 14:54:49 [INFO    ] docforge.services.document generate_structured_document:206 — generate_structured_document complete | sections=12
+2026-04-23 14:54:49 [INFO    ] docforge.services.document save_document:322 — save_document | session=e409da13-fd0e-4abb-acb4-f57ff8b8f5a4 template=85
+2026-04-23 14:54:49 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:54:49 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:54:49 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:54:49 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 14:54:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 14:54:51 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:55:32 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 14:55:33 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 14:55:34 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 14:56:28 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:56:28 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:56:28 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:56:28 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:56:28 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:56:28 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:56:29 [INFO    ] docforge.services.document regenerate_section:244 — regenerate_section | doc_id=103 section='Defect Metrics'
+2026-04-23 14:56:29 [INFO    ] docforge.services.llm generate_with_llm:86 — generate_with_llm | prompt_len=2332
+2026-04-23 14:56:29 [DEBUG   ] docforge.services.llm generate_with_llm:87 — generate_with_llm | system=Expert professional document writer for Quality Assurance. Tone: Professional. No markdown. No bracket placeholders. Tod…
+2026-04-23 14:56:37 [INFO    ] docforge.services.llm generate_with_llm:97 — generate_with_llm: success | chars=1862 elapsed=8.9s
+2026-04-23 14:56:37 [INFO    ] docforge.services.document regenerate_section:288 — regenerate_section complete | doc_id=103 section='Defect Metrics'
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:56:38 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 14:56:39 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:16:32 [INFO    ] docforge.services.question get_form_structure:558 — get_form_structure | template_id=1
+2026-04-23 18:16:32 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Human Resources' template='Employee Handbook' sections=13
+2026-04-23 18:16:32 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=4088
+2026-04-23 18:16:35 [INFO    ] docforge.services.question get_form_structure:558 — get_form_structure | template_id=41
+2026-04-23 18:16:35 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Engineering' template='Software Architecture Document' sections=12
+2026-04-23 18:16:35 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=3189
+2026-04-23 18:16:37 [INFO    ] docforge.services.question get_form_structure:558 — get_form_structure | template_id=43
+2026-04-23 18:16:37 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Engineering' template='API Design Specification' sections=12
+2026-04-23 18:16:37 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=3068
+2026-04-23 18:16:47 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=11.6s
+2026-04-23 18:16:47 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 12 questions
+2026-04-23 18:16:47 [INFO    ] docforge.services.question get_form_structure:605 — get_form_structure complete | template=Software Architecture Document dept=Engineering sections=12
+2026-04-23 18:16:49 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=11.9s
+2026-04-23 18:16:49 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 12 questions
+2026-04-23 18:16:49 [INFO    ] docforge.services.question get_form_structure:605 — get_form_structure complete | template=API Design Specification dept=Engineering sections=12
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:16:49 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:16:50 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=17.5s
+2026-04-23 18:16:50 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 18 questions
+2026-04-23 18:16:50 [INFO    ] docforge.services.question get_form_structure:605 — get_form_structure complete | template=Employee Handbook dept=Human Resources sections=13
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:16:50 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:16:55 [INFO    ] docforge.services.document generate_structured_document:149 — generate_structured_document | template='API Design Specification' dept='Engineering'
+2026-04-23 18:16:55 [DEBUG   ] docforge.services.prompt build_unified_prompt:165 — build_unified_prompt | template='API Design Specification' archetype=PLAN sections=12 structured=True
+2026-04-23 18:16:55 [INFO    ] docforge.services.llm generate_structured_document:202 — generate_structured_document | prompt_len=4513
+2026-04-23 18:18:01 [INFO    ] docforge.services.llm generate_structured_document:216 — generate_structured_document: success | sections=12 elapsed=66.1s
+2026-04-23 18:18:01 [INFO    ] docforge.services.document generate_structured_document:206 — generate_structured_document complete | sections=12
+2026-04-23 18:18:01 [INFO    ] docforge.services.document save_document:322 — save_document | session=6a62f326-e2ce-49a7-927a-6a76f36a20b2 template=43
+2026-04-23 18:18:01 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='API Design Specification' dept='' sections=12
+2026-04-23 18:18:01 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:18:01 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='API Design Specification' dept='' sections=12
+2026-04-23 18:18:01 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='API Design Specification' dept='' sections=12
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='API Design Specification' dept='' sections=12
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:18:02 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:18:03 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:18:04 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:18:04 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:18:04 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:27:28 [INFO    ] docforge.services.question get_form_structure:558 — get_form_structure | template_id=1
+2026-04-23 18:27:28 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Human Resources' template='Employee Handbook' sections=13
+2026-04-23 18:27:28 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=4088
+2026-04-23 18:27:28 [INFO    ] docforge.services.question get_form_structure:558 — get_form_structure | template_id=1
+2026-04-23 18:27:28 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Human Resources' template='Employee Handbook' sections=13
+2026-04-23 18:27:28 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=4088
+2026-04-23 18:27:43 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=15.8s
+2026-04-23 18:27:43 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 18 questions
+2026-04-23 18:27:43 [INFO    ] docforge.services.question get_form_structure:605 — get_form_structure complete | template=Employee Handbook dept=Human Resources sections=13
+2026-04-23 18:27:44 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=15.4s
+2026-04-23 18:27:44 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 18 questions
+2026-04-23 18:27:44 [INFO    ] docforge.services.question get_form_structure:605 — get_form_structure complete | template=Employee Handbook dept=Human Resources sections=13
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='API Design Specification' dept='' sections=12
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='API Design Specification' dept='' sections=12
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:27:44 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:27:45 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:27:46 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:27:46 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:27:51 [INFO    ] docforge.services.question get_form_structure:558 — get_form_structure | template_id=21
+2026-04-23 18:27:51 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Finance and Accounting' template='Financial Policy' sections=12
+2026-04-23 18:27:51 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=3315
+2026-04-23 18:27:54 [INFO    ] docforge.services.question get_form_structure:558 — get_form_structure | template_id=25
+2026-04-23 18:27:54 [INFO    ] docforge.services.question generate_smart_questions:504 — generate_smart_questions | dept='Finance and Accounting' template='Invoice Processing SOP' sections=12
+2026-04-23 18:27:54 [INFO    ] docforge.services.llm generate_with_llm_json:143 — generate_with_llm_json | prompt_len=3202
+2026-04-23 18:28:05 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=13.4s
+2026-04-23 18:28:05 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 12 questions
+2026-04-23 18:28:05 [INFO    ] docforge.services.question get_form_structure:605 — get_form_structure complete | template=Financial Policy dept=Finance and Accounting sections=12
+2026-04-23 18:28:06 [INFO    ] docforge.services.llm generate_with_llm_json:154 — generate_with_llm_json: success | elapsed=12.4s
+2026-04-23 18:28:06 [INFO    ] docforge.services.question generate_smart_questions:544 — generate_smart_questions: returning 12 questions
+2026-04-23 18:28:06 [INFO    ] docforge.services.question get_form_structure:605 — get_form_structure complete | template=Invoice Processing SOP dept=Finance and Accounting sections=12
+2026-04-23 18:28:06 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='API Design Specification' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='API Design Specification' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:28:07 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:28:08 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:28:11 [INFO    ] docforge.services.document generate_structured_document:149 — generate_structured_document | template='Invoice Processing SOP' dept='Finance and Accounting'
+2026-04-23 18:28:11 [DEBUG   ] docforge.services.prompt build_unified_prompt:165 — build_unified_prompt | template='Invoice Processing SOP' archetype=PROCESS sections=12 structured=True
+2026-04-23 18:28:11 [INFO    ] docforge.services.llm generate_structured_document:202 — generate_structured_document | prompt_len=5459
+2026-04-23 18:28:54 [INFO    ] docforge.services.llm generate_structured_document:216 — generate_structured_document: success | sections=12 elapsed=42.6s
+2026-04-23 18:28:54 [INFO    ] docforge.services.document generate_structured_document:206 — generate_structured_document complete | sections=12
+2026-04-23 18:28:54 [INFO    ] docforge.services.document save_document:322 — save_document | session=c010c8cb-2644-468c-ace7-10f80f014c9d template=25
+2026-04-23 18:28:54 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Invoice Processing SOP' dept='' sections=12
+2026-04-23 18:28:54 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=12 KB
+2026-04-23 18:28:54 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Invoice Processing SOP' dept='' sections=12
+2026-04-23 18:28:54 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=40 KB
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Invoice Processing SOP' dept='' sections=12
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=12 KB
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Invoice Processing SOP' dept='' sections=12
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=40 KB
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='API Design Specification' dept='' sections=12
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='API Design Specification' dept='' sections=12
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Defect Management Process' dept='' sections=12
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:28:55 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=15 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Disaster Recovery Plan' dept='' sections=12
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=41 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='DevOps Runbook' dept='' sections=12
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=21 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Compliance Policy' dept='' sections=12
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=20 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='IT Asset Management Policy' dept='' sections=13
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=43 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Accounts Payable Process Document' dept='' sections=12
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:158 — render_pdf | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.pdf render_pdf:291 — render_pdf complete | size=19 KB
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:180 — render_docx | title='Code of Conduct' dept='' sections=13
+2026-04-23 18:28:56 [INFO    ] docforge.renderers.docx render_docx:313 — render_docx complete | size=42 KB

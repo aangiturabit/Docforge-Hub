@@ -357,3 +357,4 @@ def preview_document(
 
 def get_all_versions(db: Session, session_id: UUID):
     return crud.get_documents_by_session(db, session_id)
+

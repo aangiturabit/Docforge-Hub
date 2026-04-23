@@ -11,8 +11,7 @@ from backend.schemas.schemas import (
     AnswerItem,
     SaveAnswersRequest,
     DocumentLibraryItem,
-    ValidateDocumentRequest,
-    ValidateDocumentResponse,
+   
     RegenerateDocumentRequest,
     NotionPublishRequest,
     NotionPublishResponse

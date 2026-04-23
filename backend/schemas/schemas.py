@@ -165,45 +165,45 @@ class NotionPublishResponse(BaseModel):
 # VALIDATE DOCUMENT SCHEMAS
 # ─────────────────────────────────────────
 
-class ValidateDocumentRequest(BaseModel):
-    document_id: int
+# class ValidateDocumentRequest(BaseModel):
+#     document_id: int
 
 
-class ValidateDocumentResponse(BaseModel):
-    document_id: int
-    is_valid: bool = False
-    total_issues: int = 0
-    issues: List[Dict[str, Any]] = []
-    missing_sections: List[str] = []
-    order_issues: List[str] = []
-    table_issues: List[str] = []
-    grounding_issues: List[str] = []
-    placeholder_issues: List[str] = []
-    # llm_judge_result: Optional[Dict[str, Any]] = None
+# class ValidateDocumentResponse(BaseModel):
+#     document_id: int
+#     is_valid: bool = False
+#     total_issues: int = 0
+#     issues: List[Dict[str, Any]] = []
+#     missing_sections: List[str] = []
+#     order_issues: List[str] = []
+#     table_issues: List[str] = []
+#     grounding_issues: List[str] = []
+#     placeholder_issues: List[str] = []
+#     # llm_judge_result: Optional[Dict[str, Any]] = None
 
-    class Config:
-        from_attributes = True
+#     class Config:
+#         from_attributes = True
 # ─────────────────────────────────────────
 # VALIDATION RESPONSE
 # ─────────────────────────────────────────
 
-class ValidationIssue(BaseModel):
-    type: str
-    section: str
-    detail: str
+# class ValidationIssue(BaseModel):
+#     type: str
+#     section: str
+#     detail: str
 
 
-class ValidationResponse(BaseModel):
-    document_id: int
-    is_valid: bool
-    total_issues: int
-    issues: List[ValidationIssue]
-    missing_sections: List[str]
-    order_issues: List[str]
-    table_issues: List[str]
-    grounding_issues: List[str]
-    placeholder_issues: List[str]
-    # llm_judge_result: Optional[dict] = None
+# class ValidationResponse(BaseModel):
+#     document_id: int
+#     is_valid: bool
+#     total_issues: int
+#     issues: List[ValidationIssue]
+#     missing_sections: List[str]
+#     order_issues: List[str]
+#     table_issues: List[str]
+#     grounding_issues: List[str]
+#     placeholder_issues: List[str]
+#     # llm_judge_result: Optional[dict] = None
 
 # ─────────────────────────────────────────
 # REGENERATE DOCUMENT SCHEMAS

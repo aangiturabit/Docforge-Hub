@@ -588,8 +588,8 @@ from backend.schemas.schemas import (
     RegenerateDocumentRequest,
     RegenerateSectionRequest,
     RegenerateSectionResponse,
-    ValidateDocumentRequest,
-    ValidateDocumentResponse,
+    # ValidateDocumentRequest,
+    # ValidateDocumentResponse,
 )
 from backend.services import document_service, llm_service, prompt_service, question_service
 from backend.utils.logger import get_logger
@@ -775,16 +775,16 @@ def generate_document(request: GenerateDocumentRequest, db: Session = Depends(ge
 # VALIDATE
 # ─────────────────────────────────────────
 
-@router.post("/generate/validate", response_model=ValidateDocumentResponse)
-def validate_document(request: ValidateDocumentRequest, db: Session = Depends(get_db)):
-    try:
-        result = document_service.validate_document(db, request.document_id)
-    except Exception as exc:
-        logger.error("validate_document failed: %s", exc, exc_info=True)
-        raise HTTPException(status_code=500, detail="Validation service error")
-    if "error" in result:
-        raise HTTPException(status_code=404, detail=result["error"])
-    return result
+# @router.post("/generate/validate", response_model=ValidateDocumentResponse)
+# def validate_document(request: ValidateDocumentRequest, db: Session = Depends(get_db)):
+#     try:
+#         result = document_service.validate_document(db, request.document_id)
+#     except Exception as exc:
+#         logger.error("validate_document failed: %s", exc, exc_info=True)
+#         raise HTTPException(status_code=500, detail="Validation service error")
+#     if "error" in result:
+#         raise HTTPException(status_code=404, detail=result["error"])
+#     return result
 
 
 # ─────────────────────────────────────────
