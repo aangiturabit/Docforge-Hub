@@ -6,18 +6,25 @@ from typing import Dict, Optional
 from backend.services.section_utils import (
     SECTION_DEPTH_HINT,
     classify_section_role,
-  
     section_needs_table,
 )
-from backend.services.text_utils import answers_to_context
 from backend.utils.logger import get_logger
 
 logger = get_logger("docforge.services.prompt")
 
 
-# ═══════════════════════════════════════════════════════
-# ARCHETYPE DETECTION
-# ═══════════════════════════════════════════════════════
+# ── Inline helper (removed from text_utils) ──────────────────────────────────
+
+def _answers_to_context(answers: dict) -> str:
+    if not answers:
+        return "  No specific details provided — use professional defaults."
+    return "\n".join(
+        f"  {k}: {str(v).strip() if v and str(v).strip() else 'not specified'}"
+        for k, v in answers.items()
+    )
+
+
+# ── Archetype detection ───────────────────────────────────────────────────────
 
 _ARCHETYPE_SIGNALS: dict[str, list[str]] = {
     "LETTER":   ["offer letter", "appointment", "relieving", "termination",
@@ -45,12 +52,8 @@ def _detect_archetype(template_name: str) -> str:
     return "PLAN"
 
 
-# ═══════════════════════════════════════════════════════
-# COMPACT LOOKUP TABLES
-# archetype tone + format hint combined; department tone
-# ═══════════════════════════════════════════════════════
+# ── Lookup tables ─────────────────────────────────────────────────────────────
 
-# archetype → (tone, format hint)
 _ARCHETYPE: dict[str, tuple[str, str]] = {
     "LETTER":   ("professional, warm — direct address to recipient",
                  "Letterhead → named recipient → compensation table → signatory block."),
@@ -66,7 +69,6 @@ _ARCHETYPE: dict[str, tuple[str, str]] = {
                  "Objective → milestones/owners → KPIs → risk factors → approval."),
 }
 
-# department → tone
 _DEPT_TONE: dict[str, str] = {
     "human resources":         "formal yet warm — empathetic, professional",
     "legal":                   "precise and formal — unambiguous, clause-based",
@@ -81,9 +83,7 @@ _DEPT_TONE: dict[str, str] = {
 }
 
 
-# ═══════════════════════════════════════════════════════
-# SECTION INTELLIGENCE
-# ═══════════════════════════════════════════════════════
+# ── Section intelligence ──────────────────────────────────────────────────────
 
 def _build_section_intelligence(sections: list) -> str:
     lines = []
@@ -95,9 +95,7 @@ def _build_section_intelligence(sections: list) -> str:
     return "\n".join(lines)
 
 
-# ═══════════════════════════════════════════════════════
-# TABLE PROMPT  (LLM-readable instruction — replaces function logic)
-# ═══════════════════════════════════════════════════════
+# ── Table rules ───────────────────────────────────────────────────────────────
 
 _TABLE_PROMPT = """
 TABLE CONSTRUCTION RULES (apply to every section marked TABLE REQUIRED):
@@ -118,11 +116,7 @@ TABLE CONSTRUCTION RULES (apply to every section marked TABLE REQUIRED):
 """
 
 
-# ═══════════════════════════════════════════════════════
-# UNIFIED PROMPT BUILDER
-# Replaces: DOCUMENT_SYSTEM_PROMPT, STRUCTURED_SYSTEM_PROMPT,
-#           build_prompt, build_structured_prompt
-# ═══════════════════════════════════════════════════════
+# ── Unified prompt builder ────────────────────────────────────────────────────
 
 def build_unified_prompt(
     sections: list,
@@ -133,15 +127,6 @@ def build_unified_prompt(
     company: Optional[Dict] = None,
     structured: bool = False,
 ) -> str:
-    """
-    Single prompt builder for all generation paths.
-
-    Parameters
-    ----------
-    structured : bool
-        False → plain-text output (preview, fallback, section regen)
-        True  → JSON output (generate_structured_document)
-    """
     today        = date.today().strftime("%d %B %Y")
     archetype    = _detect_archetype(template_name)
     arch_tone, fmt_hint = _ARCHETYPE.get(archetype, ("professional and formal", ""))
@@ -159,7 +144,7 @@ def build_unified_prompt(
 
     section_count = len(sections)
     section_info  = _build_section_intelligence(sections)
-    answers_ctx   = answers_to_context(answers)
+    answers_ctx   = _answers_to_context(answers)
     has_tables    = any(section_needs_table(s.section_name) for s in sections)
 
     logger.debug(
@@ -167,16 +152,15 @@ def build_unified_prompt(
         template_name, archetype, section_count, structured,
     )
 
-    # ── Shared body ───────────────────────────────────────────────────────────
     prompt = f"""You are DocForge, a professional document generation engine for B2B SaaS businesses.
 Today's date: {today}
 
 ABSOLUTE RULES — NEVER VIOLATE:
 1. NEVER use [brackets] — no [DATE], [NAME], [Amount], [Insert anything]
 2. Use exact values from the variable data provided or fill with contextually appropriate content — do not invent details
-3. NEVER write "Not Provided" specially in any approval section  — write a contextually appropriate phrase instead 
+3. NEVER write "Not Provided" specially in any approval section — write a contextually appropriate phrase instead
 4. Use {today} for any date field not explicitly provided
-5. No ##, no **, no --, no markdown symbols in content no table | cell text, no markdown lists — only clean plain text or structured JSON as specified in the output rules below
+5. No ##, no **, no --, no markdown symbols in content, no table | cell text, no markdown lists — only clean plain text or structured JSON as specified below
 6. UTF-8 safe characters only
 
 DOCUMENT CONTEXT:
@@ -195,11 +179,9 @@ VARIABLE DATA — EMBED ALL VALUES IN THE DOCUMENT:
 {answers_ctx}
 """
 
-    # ── Table rules (only injected when document has table sections) ──────────
     if has_tables:
         prompt += _TABLE_PROMPT
 
-    # ── Structured JSON output ─────────────────────────────────────────────────
     if structured:
         prompt += f"""
 SECTION TYPE → content_type:
@@ -212,7 +194,7 @@ CONTENT DEPTH:
 - BODY / OBLIGATION:     minimum 300 words, detailed
 - HEADER:                compact, 50-150 words, exact values only
 - SIGN_OFF:              formal block, 40-100 words max
-- Approval sections:     must include a clear call to action for approver according to the context, no placeholders or "Not Provided" text
+- Approval sections:     must include a clear call to action for approver, no placeholders or "Not Provided"
 
 Return ONLY this JSON — no text before or after, no markdown:
 {{
@@ -244,18 +226,16 @@ FINAL CHECK — fix before outputting if any answer is no:
 - Zero [bracket] placeholders anywhere?
 - No "Not Provided" text anywhere?
 - Content substantive and professionally written?
-- Add details from variable data where possible according to section context, do not leave gaps or hallucination ?
+- Add details from variable data where possible, do not leave gaps or hallucinations.
 """
-
-    # ── Plain text output ──────────────────────────────────────────────────────
     else:
         prompt += f"""
 SECTION DEPTH:
 - HEADER / SIGN_OFF:  compact, exact values only — 50-150 words
 - OPENER / CLOSURE:   minimum 200 words, 3-4 full paragraphs
-- BODY / OBLIGATION:  minimum 300 words, detailed and formal and professional
-- Approval sections:  must include a clear call to action for approver according to the context
-- TABLE sections:     real column headers + real data rows from provided values . never fill with or leave blank values or detail in a table .
+- BODY / OBLIGATION:  minimum 300 words, detailed and formal
+- Approval sections:  must include a clear call to action for approver
+- TABLE sections:     real column headers + real data rows from provided values, never leave blank.
 
 OUTPUT RULES:
 - Start directly with document content — no preamble
@@ -267,94 +247,36 @@ OUTPUT RULES:
     return prompt
 
 
-# ═══════════════════════════════════════════════════════
-# BACKWARD-COMPAT WRAPPERS
-# All existing callers (document_service, router) continue to work unchanged.
-# ═══════════════════════════════════════════════════════
+# ── Backward-compat wrappers ──────────────────────────────────────────────────
 
-def build_prompt(
-    sections: list,
-    department_name: str,
-    template_name: str,
-    template_description: str,
-    answers: Dict[str, str],
-    company: Optional[Dict] = None,
-) -> str:
-    return build_unified_prompt(
-        sections=sections,
-        department_name=department_name,
-        template_name=template_name,
-        template_description=template_description,
-        answers=answers,
-        company=company,
-        structured=False,
-    )
+def build_prompt(sections, department_name, template_name, template_description, answers, company=None) -> str:
+    return build_unified_prompt(sections=sections, department_name=department_name, template_name=template_name,
+                                template_description=template_description, answers=answers, company=company, structured=False)
 
 
-def build_structured_prompt(
-    sections: list,
-    department_name: str,
-    template_name: str,
-    template_description: str,
-    answers: dict,
-    company: dict = None,
-) -> str:
-    return build_unified_prompt(
-        sections=sections,
-        department_name=department_name,
-        template_name=template_name,
-        template_description=template_description,
-        answers=answers,
-        company=company,
-        structured=True,
-    )
+def build_structured_prompt(sections, department_name, template_name, template_description, answers, company=None) -> str:
+    return build_unified_prompt(sections=sections, department_name=department_name, template_name=template_name,
+                                template_description=template_description, answers=answers, company=company, structured=True)
 
 
-# ═══════════════════════════════════════════════════════
-# REGENERATE
-# ═══════════════════════════════════════════════════════
-
-def build_regenerate_prompt(
-    sections: list,
-    department_name: str,
-    template_name: str,
-    template_description: str,
-    answers: Dict[str, str],
-    feedback: Optional[str] = None,
-    company: Optional[Dict] = None,
-) -> str:
-    base = build_prompt(
-        sections=sections,
-        department_name=department_name,
-        template_name=template_name,
-        template_description=template_description,
-        answers=answers,
-        company=company,
-    )
+def build_regenerate_prompt(sections, department_name, template_name, template_description, answers, feedback=None, company=None) -> str:
+    base = build_prompt(sections=sections, department_name=department_name, template_name=template_name,
+                        template_description=template_description, answers=answers, company=company)
     if feedback:
-        base += (
-            f"\n\nUSER FEEDBACK TO APPLY:\n{feedback}\n\n"
-            "Apply the feedback above. Keep all sections. Maintain professional tone."
-        )
+        base += f"\n\nUSER FEEDBACK TO APPLY:\n{feedback}\n\nApply the feedback above. Keep all sections. Maintain professional tone."
     return base
 
 
-# ═══════════════════════════════════════════════════════
-# SYSTEM PROMPT CONSTANTS
-# Kept thin — full instructions live inside build_unified_prompt.
-# Callers that pass these to llm_service.generate_with_llm() continue to work.
-# ═══════════════════════════════════════════════════════
+# ── System prompt constants ───────────────────────────────────────────────────
 
 DOCUMENT_SYSTEM_PROMPT = (
     "You are DocForge, a professional document generation engine for B2B SaaS businesses. "
-    "Generate premium-quality,detailed comprehensive executive-ready plain-text documents. "
-    "Today's date: {today}. "
-    "Never use [brackets]. Never write 'Not Provided'. No markdown."
+    "Generate premium-quality, detailed, comprehensive, executive-ready plain-text documents. "
+    "Today's date: {today}. Never use [brackets]. Never write 'Not Provided'. No markdown."
 )
 
 STRUCTURED_SYSTEM_PROMPT = (
     "You are DocForge, a structured document generation engine for B2B SaaS companies. "
     "Output ONLY valid JSON — no plain text or markdown outside JSON string values. "
-    "Today's date: {today}. "
-    "Never use [brackets]. Never write 'Not Provided'. word_count must be an integer."
+    "Today's date: {today}. Never use [brackets]. Never write 'Not Provided'. word_count must be an integer."
 )

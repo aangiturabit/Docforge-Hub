@@ -9,23 +9,10 @@ from sqlalchemy.orm import Session
 from backend.database import crud
 from backend.services import llm_service, prompt_service
 from backend.services.section_utils import classify_section_role, section_needs_table
-from backend.services.text_utils import (
-    _build_fallback_table,
-    auto_fix_structured,
-    clean_text,
-    format_answers,
-    normalize_structured,
-    replace_placeholders,
-    sanitize_answers,
-)
+from backend.services.text_utils import clean_text, replace_placeholders, sanitize_answers
 from backend.utils.logger import get_logger
 
 logger = get_logger("docforge.services.document")
-
-
-# ═══════════════════════════════════════════════════════
-# CONFIG — styling default + role instructions in one place
-# ═══════════════════════════════════════════════════════
 
 _DEFAULT_STYLING = {"alignment": "justify", "font_weight": "normal", "page_break_after": False}
 
@@ -41,17 +28,28 @@ _ROLE_INSTRUCTIONS = {
 }
 
 
-# ═══════════════════════════════════════════════════════
-# INTERNAL HELPERS
-# ═══════════════════════════════════════════════════════
-
-def _clean_text(text: str) -> str:
-    """Public alias — callers outside this module use this name."""
-    return clean_text(text)
-
+# ── Helpers ──────────────────────────────────────────────────────────────────
 
 def _today() -> str:
     return date.today().strftime("%d %B %Y")
+
+
+def _normalize(raw) -> dict:
+    if isinstance(raw, dict):
+        raw.setdefault("sections", [])
+        return raw
+    if isinstance(raw, list):
+        return {"sections": raw}
+    return {"sections": []}
+
+
+def _format_answers(answers: dict) -> str:
+    if not answers:
+        return "  No specific details provided — use professional defaults."
+    return "\n".join(
+        f"  {k}: {str(v).strip() if v and str(v).strip() else 'not specified'}"
+        for k, v in answers.items()
+    )
 
 
 def _parse_table_rows(text: str) -> list:
@@ -70,34 +68,22 @@ def _parse_table_rows(text: str) -> list:
     return rows
 
 
-def _section_prompt(
-    section_name: str,
-    template_name: str,
-    department_name: str,
-    answers: dict,
-    company: dict,
-    feedback: str = None,
-    style_snippet: str = "",
-) -> tuple[str, str]:
-    today        = _today()
-    role         = classify_section_role(section_name)
-    needs_tbl    = section_needs_table(section_name)
-    tone         = (company or {}).get("tone", "Professional")
-    company_name = (company or {}).get("name") or department_name or "the company"
-    instruction  = _ROLE_INSTRUCTIONS.get(role, _ROLE_INSTRUCTIONS["BODY"]).replace("{today}", today)
+def _section_prompt(section_name, template_name, dept_name, answers, company, feedback=None, style_snippet=""):
+    today       = _today()
+    role        = classify_section_role(section_name)
+    tone        = (company or {}).get("tone", "Professional")
+    company_name = (company or {}).get("name") or dept_name or "the company"
+    instruction = _ROLE_INSTRUCTIONS.get(role, _ROLE_INSTRUCTIONS["BODY"]).replace("{today}", today)
 
     system = f"Expert professional document writer for {company_name}. Tone: {tone}. No markdown. No bracket placeholders. Today: {today}."
     prompt = (
         f"Regenerate the '{section_name}' section for a {template_name} document.\n\n"
-        f"DOCUMENT TYPE: {template_name}\n"
-        f"DEPARTMENT: {department_name}\n"
-        f"TODAY: {today}\n\n"
-        f"SECTION ROLE: {role}\n"
-        f"INSTRUCTION: {instruction}\n"
-        + (f"\nTABLE FORMAT: rows separated by |, real values only\n" if needs_tbl else "")
+        f"DOCUMENT TYPE: {template_name}\nDEPARTMENT: {dept_name}\nTODAY: {today}\n\n"
+        f"SECTION ROLE: {role}\nINSTRUCTION: {instruction}\n"
+        + (f"\nTABLE FORMAT: rows separated by |, real values only\n" if section_needs_table(section_name) else "")
         + (f"\nFEEDBACK: {feedback}\n" if feedback else "")
         + (f"\nSTYLE REFERENCE:\n{style_snippet}\n" if style_snippet else "")
-        + f"\nVARIABLE DATA:\n{format_answers(answers or {})}\n\n"
+        + f"\nVARIABLE DATA:\n{_format_answers(answers or {})}\n\n"
         "Rules: content body only, no heading, no markdown, no placeholders."
     )
     return system, prompt
@@ -109,43 +95,26 @@ def _apply_section_content(structured: dict, section_name: str, new_content: str
 
     if needs_tbl:
         rows = _parse_table_rows(new_clean)
-        if not rows or len(rows) < 2:
-            rows = _build_fallback_table(section_name, answers or {})
-        content, ctype, wc = rows, "table", 0
+        content, ctype, wc = (rows if len(rows) >= 2 else []), "table", 0
     else:
         content, ctype, wc = new_clean, "text", len(new_clean.split())
 
     for s in structured.get("sections", []):
         if section_name.lower() in s.get("heading", "").lower():
-            s["content_type"] = ctype
-            s["content"]      = content
-            s["word_count"]   = wc
+            s.update({"content_type": ctype, "content": content, "word_count": wc})
             return structured
 
     structured.setdefault("sections", []).append({
-        "id":           f"section_regen_{section_name[:10]}",
-        "heading":      section_name,
-        "content_type": ctype,
-        "content":      content,
-        "styling":      _DEFAULT_STYLING.copy(),
-        "word_count":   wc,
+        "id": f"section_regen_{section_name[:10]}", "heading": section_name,
+        "content_type": ctype, "content": content,
+        "styling": _DEFAULT_STYLING.copy(), "word_count": wc,
     })
     return structured
 
 
-# ═══════════════════════════════════════════════════════
-# STRUCTURED DOCUMENT GENERATION
-# ═══════════════════════════════════════════════════════
+# ── Document generation ───────────────────────────────────────────────────────
 
-def generate_structured_document(
-    db,
-    department_name: str,
-    template_name: str,
-    template_description: str,
-    template_id: int,
-    answers: dict,
-    company: dict = None,
-) -> dict:
+def generate_structured_document(db, department_name, template_name, template_description, template_id, answers, company=None) -> dict:
     logger.info("generate_structured_document | template=%r dept=%r", template_name, department_name)
 
     safe_answers = sanitize_answers(answers or {})
@@ -153,24 +122,15 @@ def generate_structured_document(
 
     system = prompt_service.STRUCTURED_SYSTEM_PROMPT.format(today=_today())
     user_prompt = prompt_service.build_structured_prompt(
-        sections=sections_db,
-        department_name=department_name,
-        template_name=template_name,
-        template_description=template_description,
-        answers=safe_answers,
-        company=company,
+        sections=sections_db, department_name=department_name, template_name=template_name,
+        template_description=template_description, answers=safe_answers, company=company,
     )
 
-    raw = normalize_structured(
-        llm_service.generate_structured_document(system_prompt=system, user_prompt=user_prompt)
-    )
-
+    raw = _normalize(llm_service.generate_structured_document(system_prompt=system, user_prompt=user_prompt))
     cleaned, headings = [], []
-    for sec in raw.get("sections", []):
-        heading = clean_text(sec.get("heading", ""))
-        ct      = sec.get("content_type", "text")
-        c       = sec.get("content", "")
 
+    for sec in raw.get("sections", []):
+        ct, c = sec.get("content_type", "text"), sec.get("content", "")
         if ct == "text" and isinstance(c, str):
             c = clean_text(replace_placeholders(c, safe_answers))
         elif ct == "table" and isinstance(c, list):
@@ -179,42 +139,34 @@ def generate_structured_document(
         elif ct == "list" and isinstance(c, list):
             c = [clean_text(replace_placeholders(str(x), safe_answers)) for x in c if str(x).strip()]
 
+        heading = clean_text(sec.get("heading", ""))
         cleaned.append({
-            "id":           sec.get("id", f"section_{len(cleaned)+1}"),
-            "heading":      heading,
-            "content_type": ct,
-            "content":      c,
-            "styling":      sec.get("styling", _DEFAULT_STYLING.copy()),
-            "word_count":   len(c.split()) if isinstance(c, str) else 0,
+            "id": sec.get("id", f"section_{len(cleaned)+1}"), "heading": heading,
+            "content_type": ct, "content": c,
+            "styling": sec.get("styling", _DEFAULT_STYLING.copy()),
+            "word_count": len(c.split()) if isinstance(c, str) else 0,
         })
         headings.append(heading.lower())
 
-    # Insert placeholder for any missing required section
     for req in [s.section_name for s in sections_db]:
         if not any(req.lower() in h for h in headings):
             cleaned.append({
-                "id":           f"section_missing_{req[:10]}",
-                "heading":      req,
-                "content_type": "text",
-                "content":      "Pending generation.",
-                "styling":      _DEFAULT_STYLING.copy(),
-                "word_count":   0,
+                "id": f"section_missing_{req[:10]}", "heading": req,
+                "content_type": "text", "content": "Pending generation.",
+                "styling": _DEFAULT_STYLING.copy(), "word_count": 0,
             })
 
     raw["sections"] = cleaned
-    result = auto_fix_structured(raw, safe_answers, sections_db)
-    logger.info("generate_structured_document complete | sections=%d", len(result.get("sections", [])))
-    return result
+    logger.info("generate_structured_document complete | sections=%d", len(cleaned))
+    return raw
 
 
 def structured_to_plain_text(structured: dict) -> str:
     lines = []
     for sec in structured.get("sections", []):
-        heading = sec.get("heading", "")
-        ct      = sec.get("content_type", "text")
-        c       = sec.get("content", "")
-        if heading:
-            lines.append(f"\n{heading}\n")
+        ct, c = sec.get("content_type", "text"), sec.get("content", "")
+        if sec.get("heading"):
+            lines.append(f"\n{sec['heading']}\n")
         if ct == "text" and isinstance(c, str):
             lines.append(f"{c}\n")
         elif ct == "table" and isinstance(c, list):
@@ -222,25 +174,14 @@ def structured_to_plain_text(structured: dict) -> str:
                 lines.append("  " + "   |   ".join(row.get("cells", [])))
             lines.append("")
         elif ct == "list" and isinstance(c, list):
-            for item in c:
-                lines.append(f"  - {item}")
-            lines.append("")
+            lines += [f"  - {item}" for item in c] + [""]
         lines.append("")
     return "\n".join(lines)
 
 
-# ═══════════════════════════════════════════════════════
-# USER-TRIGGERED SECTION REGENERATION
-# ═══════════════════════════════════════════════════════
+# ── Section regeneration ──────────────────────────────────────────────────────
 
-def regenerate_section(
-    db: Session,
-    document_id: int,
-    section_name: str,
-    answers: dict = None,
-    feedback: str = None,
-    company: dict = None,
-) -> dict:
+def regenerate_section(db: Session, document_id: int, section_name: str, answers: dict = None, feedback: str = None, company: dict = None) -> dict:
     logger.info("regenerate_section | doc_id=%d section=%r", document_id, section_name)
 
     doc = crud.get_document_by_id(db, document_id)
@@ -251,41 +192,34 @@ def regenerate_section(
     if not template:
         return {"error": "Template not found"}
 
-    session     = crud.get_session_by_id(db, doc.session_id) if doc.session_id else None
-    dept        = crud.get_department_by_id(db, session.department_id) if session else None
-    dept_name   = dept.name if dept else "General"
+    session      = crud.get_session_by_id(db, doc.session_id) if doc.session_id else None
+    dept         = crud.get_department_by_id(db, session.department_id) if session else None
     safe_answers = sanitize_answers(answers or {})
 
-    # Style reference — prefer a substantial OPENER/BODY section, fall back to plain content
     style_snippet = ""
     if doc.structured_json:
         try:
-            for s in normalize_structured(json.loads(doc.structured_json)).get("sections", []):
+            for s in _normalize(json.loads(doc.structured_json)).get("sections", []):
                 if classify_section_role(s.get("heading", "")) in ("OPENER", "BODY") \
                         and isinstance(s.get("content"), str) and len(s["content"]) > 100:
                     style_snippet = s["content"][:1500]
                     break
         except Exception:
             pass
-    if not style_snippet:
-        style_snippet = (doc.content or "")[:1500]
+    style_snippet = style_snippet or (doc.content or "")[:1500]
 
     system, prompt = _section_prompt(
-        section_name, template.name, dept_name,
+        section_name, template.name, dept.name if dept else "General",
         safe_answers, company, feedback, style_snippet,
     )
     new_content = llm_service.generate_with_llm(prompt, system)
 
-    structured = normalize_structured(
-        json.loads(doc.structured_json) if doc.structured_json else {}
-    )
+    structured = _normalize(json.loads(doc.structured_json) if doc.structured_json else {})
     structured = _apply_section_content(structured, section_name, new_content, safe_answers)
 
     doc.structured_json = json.dumps(structured)
     doc.content         = structured_to_plain_text(structured)
     db.commit()
-
-    logger.info("regenerate_section complete | doc_id=%d section=%r", document_id, section_name)
 
     section_content = next(
         (s["content"] for s in structured.get("sections", [])
@@ -299,18 +233,9 @@ def regenerate_section(
     }
 
 
-# ═══════════════════════════════════════════════════════
-# SAVE / PREVIEW / VERSIONS
-# ═══════════════════════════════════════════════════════
+# ── Save / Preview / Versions ─────────────────────────────────────────────────
 
-def save_document(
-    db: Session,
-    session_id: UUID,
-    template_id: int,
-    title: str,
-    content: str,
-    structured_sections=None,
-) -> object:
+def save_document(db: Session, session_id: UUID, template_id: int, title: str, content: str, structured_sections=None) -> object:
     if isinstance(structured_sections, list):
         structured_json_str = json.dumps({"sections": structured_sections})
     elif isinstance(structured_sections, dict):
@@ -326,26 +251,14 @@ def save_document(
     )
 
 
-def preview_document(
-    db: Session,
-    department_name: str,
-    template_name: str,
-    template_description: str,
-    template_id: int,
-    answers: Dict[str, str],
-    company: Optional[Dict] = None,
-) -> str:
+def preview_document(db: Session, department_name: str, template_name: str, template_description: str, template_id: int, answers: Dict[str, str], company: Optional[Dict] = None) -> str:
     logger.info("preview_document | template=%r", template_name)
     safe_answers = sanitize_answers(answers or {})
     sections_db  = crud.get_sections_by_template(db, template_id)
 
     user_prompt = prompt_service.build_prompt(
-        sections=sections_db,
-        department_name=department_name,
-        template_name=template_name,
-        template_description=template_description,
-        answers=safe_answers,
-        company=company,
+        sections=sections_db, department_name=department_name, template_name=template_name,
+        template_description=template_description, answers=safe_answers, company=company,
     )
     system = (
         f"Professional business document writer. "
@@ -357,4 +270,3 @@ def preview_document(
 
 def get_all_versions(db: Session, session_id: UUID):
     return crud.get_documents_by_session(db, session_id)
-

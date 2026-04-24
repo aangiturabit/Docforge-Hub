@@ -1,19 +1,4 @@
-"""
-backend/renderers/docx_renderer.py
-─────────────────────────────────────────────────────
-High-quality .docx renderer using python-docx.
 
-Called exclusively from backend/routers/download.py — never imported by app.py.
-
-Features
-────────
-• Cover page   — company name, title, rules, dept/industry/location, date
-• Section headings — dark-navy fill, white bold text via XML shading
-• Body text    — justified, 10pt, 1.4× line spacing
-• Tables       — dark-navy header row, alternating row tints
-• Lists        — bullet-style paragraphs
-• Footer       — page number field on every page
-"""
 
 import io
 import re
