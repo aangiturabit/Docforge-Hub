@@ -17,14 +17,14 @@ logger = get_logger("docforge.services.document")
 _DEFAULT_STYLING = {"alignment": "justify", "font_weight": "normal", "page_break_after": False}
 
 _ROLE_INSTRUCTIONS = {
-    "HEADER":     "Concise factual header (50-150 words). Exact values: title, date ({today}), names, company. No sentences.",
-    "OPENER":     "3-4 paragraphs (180+ words). Purpose, background, scope, importance. No bullet points.",
+    "HEADER":     "Concise factual header (100-150 words). Exact values: title, date ({today}), names, company. No sentences.",
+    "OPENER":     "3-4 paragraphs (200-250 words). Purpose, background, scope, importance. No bullet points.",
     "STRUCTURAL": "Numbered definitions, 4+ items (150-300 words).",
     "OBLIGATION": "Formal obligations (250+ words). Must/shall language. Complete enforceable statements.",
     "EVIDENCE":   "Data-driven analysis (200+ words). Specific findings. Table if numerical data present.",
-    "BODY":       "Detailed content (250+ words). Full explanations. Use all answer values.",
-    "CLOSURE":    "Actionable recommendations (120+ words). Action + owner + timeline per item.",
-    "SIGN_OFF":   "Formal closing block (60-90 words). Signatory + designation + date ({today}).",
+    "BODY":       "Detailed content (350-400 words). Full explanations. Use all answer values.",
+    "CLOSURE":    "Actionable recommendations (150-200 words). Action + owner + timeline per item.",
+    "SIGN_OFF":   "Formal closing block (90-120 words). Signatory + designation + date ({today}).",
 }
 
 
@@ -68,6 +68,46 @@ def _parse_table_rows(text: str) -> list:
     return rows
 
 
+def _normalize_heading(value: str) -> str:
+    return re.sub(r"\s+", " ", (value or "").strip().lower())
+
+
+def _find_section(sections: list, section_name: str) -> Optional[dict]:
+    target = _normalize_heading(section_name)
+    if not target:
+        return None
+
+    for section in sections:
+        if _normalize_heading(section.get("heading", "")) == target:
+            return section
+
+    for section in sections:
+        heading = _normalize_heading(section.get("heading", ""))
+        if target in heading or heading in target:
+            return section
+
+    return None
+
+
+def _feedback_requests_no_table(feedback: str = None) -> bool:
+    text = (feedback or "").lower()
+    no_table_patterns = (
+        r"\bno\s+table\b",
+        r"\bwithout\s+(a\s+)?table\b",
+        r"\bdon'?t\s+(want|use|make|create|include)\s+(a\s+)?table\b",
+        r"\bdo\s+not\s+(use|make|create|include)\s+(a\s+)?table\b",
+        r"\bremove\s+(the\s+)?table\b",
+        r"\bplain\s+text\b",
+        r"\bparagraph",
+        r"\bprose\b",
+    )
+    return any(re.search(pattern, text) for pattern in no_table_patterns)
+
+
+def _section_should_use_table(section_name: str, feedback: str = None) -> bool:
+    return section_needs_table(section_name) and not _feedback_requests_no_table(feedback)
+
+
 def _section_prompt(section_name, template_name, dept_name, answers, company, feedback=None, style_snippet=""):
     today       = _today()
     role        = classify_section_role(section_name)
@@ -76,11 +116,19 @@ def _section_prompt(section_name, template_name, dept_name, answers, company, fe
     instruction = _ROLE_INSTRUCTIONS.get(role, _ROLE_INSTRUCTIONS["BODY"]).replace("{today}", today)
 
     system = f"Expert professional document writer for {company_name}. Tone: {tone}. No markdown. No bracket placeholders. Today: {today}."
+    wants_table = _section_should_use_table(section_name, feedback)
+    no_table_instruction = (
+        "\nFORMAT OVERRIDE: Write this section as normal paragraphs/list text only. "
+        "Do not use tables, pipe-delimited rows, markdown tables, or tabular columns.\n"
+        if _feedback_requests_no_table(feedback) else ""
+    )
+
     prompt = (
         f"Regenerate the '{section_name}' section for a {template_name} document.\n\n"
         f"DOCUMENT TYPE: {template_name}\nDEPARTMENT: {dept_name}\nTODAY: {today}\n\n"
         f"SECTION ROLE: {role}\nINSTRUCTION: {instruction}\n"
-        + (f"\nTABLE FORMAT: rows separated by |, real values only\n" if section_needs_table(section_name) else "")
+        + (f"\nTABLE FORMAT: rows separated by |, real values only\n" if wants_table else "")
+        + no_table_instruction
         + (f"\nFEEDBACK: {feedback}\n" if feedback else "")
         + (f"\nSTYLE REFERENCE:\n{style_snippet}\n" if style_snippet else "")
         + f"\nVARIABLE DATA:\n{_format_answers(answers or {})}\n\n"
@@ -89,22 +137,26 @@ def _section_prompt(section_name, template_name, dept_name, answers, company, fe
     return system, prompt
 
 
-def _apply_section_content(structured: dict, section_name: str, new_content: str, answers: dict) -> dict:
-    needs_tbl = section_needs_table(section_name)
+def _apply_section_content(structured: dict, section_name: str, new_content: str, answers: dict, feedback: str = None) -> dict:
+    needs_tbl = _section_should_use_table(section_name, feedback)
     new_clean = clean_text(replace_placeholders(new_content, answers))
 
     if needs_tbl:
         rows = _parse_table_rows(new_clean)
-        content, ctype, wc = (rows if len(rows) >= 2 else []), "table", 0
+        if len(rows) >= 2:
+            content, ctype, wc = rows, "table", 0
+        else:
+            content, ctype, wc = new_clean, "text", len(new_clean.split())
     else:
         content, ctype, wc = new_clean, "text", len(new_clean.split())
 
-    for s in structured.get("sections", []):
-        if section_name.lower() in s.get("heading", "").lower():
-            s.update({"content_type": ctype, "content": content, "word_count": wc})
-            return structured
+    sections = structured.setdefault("sections", [])
+    section = _find_section(sections, section_name)
+    if section:
+        section.update({"content_type": ctype, "content": content, "word_count": wc})
+        return structured
 
-    structured.setdefault("sections", []).append({
+    sections.append({
         "id": f"section_regen_{section_name[:10]}", "heading": section_name,
         "content_type": ctype, "content": content,
         "styling": _DEFAULT_STYLING.copy(), "word_count": wc,
@@ -215,17 +267,14 @@ def regenerate_section(db: Session, document_id: int, section_name: str, answers
     new_content = llm_service.generate_with_llm(prompt, system)
 
     structured = _normalize(json.loads(doc.structured_json) if doc.structured_json else {})
-    structured = _apply_section_content(structured, section_name, new_content, safe_answers)
+    structured = _apply_section_content(structured, section_name, new_content, safe_answers, feedback)
 
     doc.structured_json = json.dumps(structured)
     doc.content         = structured_to_plain_text(structured)
     db.commit()
 
-    section_content = next(
-        (s["content"] for s in structured.get("sections", [])
-         if section_name.lower() in s.get("heading", "").lower()),
-        new_content,
-    )
+    section = _find_section(structured.get("sections", []), section_name)
+    section_content = section.get("content", new_content) if section else new_content
     return {
         "document_id":     document_id,
         "section_name":    section_name,

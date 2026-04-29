@@ -112,7 +112,7 @@ TABLE CONSTRUCTION RULES (apply to every section marked TABLE REQUIRED):
    - Metrics/KPIs          → Metric | Target | Actual | Status
    - Asset/Inventory       → Asset | Description | Quantity | Status
    - Any other table       → derive logical headers from the section name and variable data
-7. Use ONLY values already present in the variable data — do not invent numbers or names
+7. Use values already present in the variable data — do not invent numbers or names. if not given fill that cell with details according to the context of the document. never leave blank or use "not provided".
 """
 
 
@@ -157,11 +157,12 @@ Today's date: {today}
 
 ABSOLUTE RULES — NEVER VIOLATE:
 1. NEVER use [brackets] — no [DATE], [NAME], [Amount], [Insert anything]
-2. Use exact values from the variable data provided or fill with contextually appropriate content — do not invent details
+2. Use exact values from the variable data provided or fill with contextually appropriate content — do not invent details. dont leave placeholders or gaps.or empty blanks in any section .
 3. NEVER write "Not Provided" specially in any approval section — write a contextually appropriate phrase instead
 4. Use {today} for any date field not explicitly provided
 5. No ##, no **, no --, no markdown symbols in content, no table | cell text, no markdown lists — only clean plain text or structured JSON as specified below
 6. UTF-8 safe characters only
+
 
 DOCUMENT CONTEXT:
 - {company_ctx}
@@ -190,9 +191,9 @@ SECTION TYPE → content_type:
 - DEFINITIONS, STEPS, LIST sections                    → "list"
 
 CONTENT DEPTH:
-- OPENER / INTRODUCTION: minimum 180 words, 3-4 paragraphs
-- BODY / OBLIGATION:     minimum 300 words, detailed
-- HEADER:                compact, 50-150 words, exact values only
+- OPENER / INTRODUCTION: minimum 200-250 words, 3-4 paragraphs
+- BODY / OBLIGATION:     minimum 300-500 words, detailed
+- HEADER:                compact, 100-150 words, exact values only
 - SIGN_OFF:              formal block, 40-100 words max
 - Approval sections:     must include a clear call to action for approver, no placeholders or "Not Provided"
 
@@ -231,9 +232,9 @@ FINAL CHECK — fix before outputting if any answer is no:
     else:
         prompt += f"""
 SECTION DEPTH:
-- HEADER / SIGN_OFF:  compact, exact values only — 50-150 words
-- OPENER / CLOSURE:   minimum 200 words, 3-4 full paragraphs
-- BODY / OBLIGATION:  minimum 300 words, detailed and formal
+- HEADER / SIGN_OFF:  compact, exact values only — 100-150 words
+- OPENER / CLOSURE:   minimum 200-250 words, 3-4 full paragraphs
+- BODY / OBLIGATION:  minimum 300-500 words, detailed and formal
 - Approval sections:  must include a clear call to action for approver
 - TABLE sections:     real column headers + real data rows from provided values, never leave blank.
 
@@ -242,6 +243,7 @@ OUTPUT RULES:
 - Generate all {section_count} sections in order
 - End with a formal sign-off block
 - Clean plain text only — no ##, no **, no markdown
+
 """
 
     return prompt

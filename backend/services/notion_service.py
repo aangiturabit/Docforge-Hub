@@ -16,6 +16,8 @@ HEADERS = {
     "Notion-Version": "2022-06-28",
 }
 
+NOTION_TEXT_CHUNK_LIMIT = 1900
+
 
 
 
@@ -59,27 +61,59 @@ def _parse_inline(text: str) -> list:
 
     for m in _INLINE_TOKEN.finditer(text):
         if m.start() > last:
-            runs.append({"type": "text", "text": {"content": text[last:m.start()]}})
+            runs.extend(_plain_runs(text[last:m.start()]))
 
         raw = m.group()
 
         if raw.startswith("***"):
-            runs.append(_annotated(raw[3:-3], bold=True, italic=True))
+            runs.extend(_annotated_runs(raw[3:-3], bold=True, italic=True))
         elif raw.startswith("**"):
-            runs.append(_annotated(raw[2:-2], bold=True))
+            runs.extend(_annotated_runs(raw[2:-2], bold=True))
         elif raw.startswith("*") or (raw.startswith("_") and raw.endswith("_")):
-            runs.append(_annotated(raw[1:-1], italic=True))
+            runs.extend(_annotated_runs(raw[1:-1], italic=True))
         elif raw.startswith("~~"):
-            runs.append(_annotated(raw[2:-2], strikethrough=True))
+            runs.extend(_annotated_runs(raw[2:-2], strikethrough=True))
         elif raw.startswith("`"):
-            runs.append(_annotated(raw[1:-1], code=True))
+            runs.extend(_annotated_runs(raw[1:-1], code=True))
 
         last = m.end()
 
     if last < len(text):
-        runs.append({"type": "text", "text": {"content": text[last:]}})
+        runs.extend(_plain_runs(text[last:]))
 
-    return runs or [{"type": "text", "text": {"content": text}}]
+    return runs or _plain_runs(text)
+
+
+def _chunk_text(text: str) -> list[str]:
+    text = str(text or "")
+    if not text:
+        return [""]
+    return [text[i:i + NOTION_TEXT_CHUNK_LIMIT] for i in range(0, len(text), NOTION_TEXT_CHUNK_LIMIT)]
+
+
+def _plain_runs(text: str) -> list[dict]:
+    return [{"type": "text", "text": {"content": chunk}} for chunk in _chunk_text(text)]
+
+
+def _annotated_runs(
+    text: str,
+    bold: bool = False,
+    italic: bool = False,
+    strikethrough: bool = False,
+    underline: bool = False,
+    code: bool = False,
+) -> list[dict]:
+    return [
+        _annotated(
+            chunk,
+            bold=bold,
+            italic=italic,
+            strikethrough=strikethrough,
+            underline=underline,
+            code=code,
+        )
+        for chunk in _chunk_text(text)
+    ]
 
 
 def _annotated(
@@ -106,10 +140,9 @@ def _annotated(
 
 # Plain _rich() used only for DB properties (no inline parsing needed there)
 def _rich(text: str, bold: bool = False) -> list:
-    cell = {"type": "text", "text": {"content": text}}
-    if bold:
-        cell["annotations"] = {"bold": True}
-    return [cell]
+    if not bold:
+        return _plain_runs(text)
+    return _annotated_runs(text, bold=True)
 
 
 # ── Block primitives ──────────────────────────────────────────────────────────
@@ -497,12 +530,19 @@ def publish_document(
         page_url  = page_data.get("url", f"https://notion.so/{page_id.replace('-', '')}")
 
         for start in range(100, len(blocks), 100):
-            requests.patch(
+            append_response = requests.patch(
                 f"https://api.notion.com/v1/blocks/{page_id}/children",
                 headers=HEADERS,
                 json={"children": blocks[start:start + 100]},
                 timeout=30,
             )
+            if append_response.status_code not in (200, 201):
+                return {
+                    "error": (
+                        f"Notion append error: {append_response.status_code} — "
+                        f"{append_response.text[:500]}"
+                    )
+                }
 
         return {"page_id": page_id, "url": page_url, "status": "published"}
 
