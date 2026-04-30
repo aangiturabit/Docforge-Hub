@@ -46,10 +46,31 @@ def _normalize(raw) -> dict:
 def _format_answers(answers: dict) -> str:
     if not answers:
         return "  No specific details provided — use professional defaults."
-    return "\n".join(
-        f"  {k}: {str(v).strip() if v and str(v).strip() else 'not specified'}"
-        for k, v in answers.items()
-    )
+
+    answered = []
+    unanswered = []
+    for key, value in answers.items():
+        if value is not None and str(value).strip():
+            answered.append(f"  {key}: {str(value).strip()}")
+        else:
+            unanswered.append(f"  {key}")
+
+    parts = []
+    if answered:
+        parts.append(
+            "ANSWERED FIELDS - rephrase professionally without changing the meaning:\n"
+            + "\n".join(answered)
+        )
+    if unanswered:
+        parts.append(
+            "UNANSWERED FIELDS - generate professional content naturally where needed:\n"
+            + "\n".join(unanswered)
+        )
+    return "\n\n".join(parts) if parts else "  No specific details provided — use professional defaults."
+
+
+def finalize_generated_text(text: str, answers: dict) -> str:
+    return clean_text(replace_placeholders(text, answers))
 
 
 def _parse_table_rows(text: str) -> list:
@@ -132,14 +153,14 @@ def _section_prompt(section_name, template_name, dept_name, answers, company, fe
         + (f"\nFEEDBACK: {feedback}\n" if feedback else "")
         + (f"\nSTYLE REFERENCE:\n{style_snippet}\n" if style_snippet else "")
         + f"\nVARIABLE DATA:\n{_format_answers(answers or {})}\n\n"
-        "Rules: content body only, no heading, no markdown, no placeholders."
+        "Rules: content body only, no heading, no markdown. Rephrase answered values professionally without changing their meaning, facts, or intent."
     )
     return system, prompt
 
 
 def _apply_section_content(structured: dict, section_name: str, new_content: str, answers: dict, feedback: str = None) -> dict:
     needs_tbl = _section_should_use_table(section_name, feedback)
-    new_clean = clean_text(replace_placeholders(new_content, answers))
+    new_clean = finalize_generated_text(new_content, answers)
 
     if needs_tbl:
         rows = _parse_table_rows(new_clean)
@@ -184,12 +205,12 @@ def generate_structured_document(db, department_name, template_name, template_de
     for sec in raw.get("sections", []):
         ct, c = sec.get("content_type", "text"), sec.get("content", "")
         if ct == "text" and isinstance(c, str):
-            c = clean_text(replace_placeholders(c, safe_answers))
+            c = finalize_generated_text(c, safe_answers)
         elif ct == "table" and isinstance(c, list):
-            c = [{"cells": [clean_text(replace_placeholders(str(x), safe_answers)) for x in r.get("cells", [])]}
+            c = [{"cells": [finalize_generated_text(str(x), safe_answers) for x in r.get("cells", [])]}
                  for r in c if isinstance(r, dict) and "cells" in r]
         elif ct == "list" and isinstance(c, list):
-            c = [clean_text(replace_placeholders(str(x), safe_answers)) for x in c if str(x).strip()]
+            c = [finalize_generated_text(str(x), safe_answers) for x in c if str(x).strip()]
 
         heading = clean_text(sec.get("heading", ""))
         cleaned.append({
@@ -314,7 +335,7 @@ def preview_document(db: Session, department_name: str, template_name: str, temp
         f"Tone: {(company or {}).get('tone', 'Professional')}. Today: {_today()}. "
         "Return clean plain text — no ## no ** no markdown."
     )
-    return llm_service.generate_with_llm(user_prompt, system_prompt=system)
+    return finalize_generated_text(llm_service.generate_with_llm(user_prompt, system_prompt=system), safe_answers)
 
 
 def get_all_versions(db: Session, session_id: UUID):

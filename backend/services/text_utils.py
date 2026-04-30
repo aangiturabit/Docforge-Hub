@@ -75,10 +75,9 @@ def replace_placeholders(text: str, answers: Optional[dict] = None, doc_context:
 def sanitize_answer_value(value: str) -> str:
     if not value:
         return ""
-    value = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", value[:2000])
+    value = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", value[:12000])
     return _INJECTION.sub("[redacted]", value).strip()
 
 
 def sanitize_answers(answers: dict) -> dict:
     return {k: sanitize_answer_value(str(v)) if v is not None else "" for k, v in answers.items()}
-

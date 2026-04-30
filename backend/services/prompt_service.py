@@ -13,15 +13,32 @@ from backend.utils.logger import get_logger
 logger = get_logger("docforge.services.prompt")
 
 
-# ── Inline helper (removed from text_utils) ──────────────────────────────────
+# ── Inline helper  ──────────────────────────────────
 
 def _answers_to_context(answers: dict) -> str:
     if not answers:
         return "  No specific details provided — use professional defaults."
-    return "\n".join(
-        f"  {k}: {str(v).strip() if v and str(v).strip() else 'not specified'}"
-        for k, v in answers.items()
-    )
+
+    answered = []
+    unanswered = []
+    for key, value in answers.items():
+        if value is not None and str(value).strip():
+            answered.append(f"  {key}: {str(value).strip()}")
+        else:
+            unanswered.append(f"  {key}")
+
+    parts = []
+    if answered:
+        parts.append(
+            "ANSWERED FIELDS - rephrase professionally without changing the meaning:\n"
+            + "\n".join(answered)
+        )
+    if unanswered:
+        parts.append(
+            "UNANSWERED FIELDS - generate professional content naturally where needed:\n"
+            + "\n".join(unanswered)
+        )
+    return "\n\n".join(parts) if parts else "  No specific details provided — use professional defaults."
 
 
 # ── Archetype detection ───────────────────────────────────────────────────────
@@ -112,7 +129,7 @@ TABLE CONSTRUCTION RULES (apply to every section marked TABLE REQUIRED):
    - Metrics/KPIs          → Metric | Target | Actual | Status
    - Asset/Inventory       → Asset | Description | Quantity | Status
    - Any other table       → derive logical headers from the section name and variable data
-7. Use values already present in the variable data — do not invent numbers or names. if not given fill that cell with details according to the context of the document. never leave blank or use "not provided".
+7. For answered values, rewrite the user's meaning professionally without changing facts or intent. If a value is not answered, fill that cell with details according to the document context. Never leave blank or use "not provided".
 """
 
 
@@ -157,7 +174,7 @@ Today's date: {today}
 
 ABSOLUTE RULES — NEVER VIOLATE:
 1. NEVER use [brackets] — no [DATE], [NAME], [Amount], [Insert anything]
-2. Use exact values from the variable data provided or fill with contextually appropriate content — do not invent details. dont leave placeholders or gaps.or empty blanks in any section .
+2. For answered fields, use the user's answer as the source meaning and rewrite it professionally. Do not ignore, contradict, over-invent, or completely change the user's context. For unanswered fields, fill with contextually appropriate content. Do not leave gaps or empty blanks in any section.
 3. NEVER write "Not Provided" specially in any approval section — write a contextually appropriate phrase instead
 4. Use {today} for any date field not explicitly provided
 5. No ##, no **, no --, no markdown symbols in content, no table | cell text, no markdown lists — only clean plain text or structured JSON as specified below
@@ -176,7 +193,7 @@ DOCUMENT CONTEXT:
 REQUIRED SECTIONS — ALL {section_count} MUST BE PRESENT IN THIS EXACT ORDER:
 {section_info}
 
-VARIABLE DATA — EMBED ALL VALUES IN THE DOCUMENT:
+VARIABLE DATA — ANSWERED FIELDS ARE USER MEANING TO REPHRASE, UNANSWERED FIELDS ARE LLM-GENERATED:
 {answers_ctx}
 """
 

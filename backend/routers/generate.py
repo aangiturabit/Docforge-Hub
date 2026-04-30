@@ -741,11 +741,12 @@ def generate_document(request: GenerateDocumentRequest, db: Session = Depends(ge
                 answers=request.answers,
                 company=request.company,
             )
-            content = document_service._clean_text(
+            content = document_service.finalize_generated_text(
                 llm_service.generate_with_llm(
                     prompt,
                     system_prompt=prompt_service.DOCUMENT_SYSTEM_PROMPT.format(today=_today()),
-                )
+                ),
+                request.answers,
             )
         except RuntimeError as llm_exc:
             crud.update_session_status(db, session.id, "failed")
@@ -838,11 +839,12 @@ def regenerate_document(request: RegenerateDocumentRequest, db: Session = Depend
                 feedback=request.feedback,
                 company=company,
             )
-            content = document_service._clean_text(
+            content = document_service.finalize_generated_text(
                 llm_service.generate_with_llm(
                     regen_prompt,
                     system_prompt=prompt_service.DOCUMENT_SYSTEM_PROMPT.format(today=today),
-                )
+                ),
+                answers,
             )
         else:
             content = document_service.structured_to_plain_text(structured)
@@ -859,11 +861,12 @@ def regenerate_document(request: RegenerateDocumentRequest, db: Session = Depend
                 feedback=getattr(request, "feedback", None),
                 company=company,
             )
-            content = document_service._clean_text(
+            content = document_service.finalize_generated_text(
                 llm_service.generate_with_llm(
                     regen_prompt,
                     system_prompt=prompt_service.DOCUMENT_SYSTEM_PROMPT.format(today=today),
-                )
+                ),
+                answers,
             )
         except RuntimeError as llm_exc:
             raise HTTPException(status_code=502, detail=f"LLM service error: {llm_exc}")
