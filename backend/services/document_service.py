@@ -18,7 +18,7 @@ _DEFAULT_STYLING = {"alignment": "justify", "font_weight": "normal", "page_break
 
 _ROLE_INSTRUCTIONS = {
     "HEADER":     "Concise factual header (100-150 words). Exact values: title, date ({today}), names, company. No sentences.",
-    "OPENER":     "3-4 paragraphs (200-250 words). Purpose, background, scope, importance. No bullet points.",
+    "OPENER":     "100-150 words. Purpose, background, scope, importance. No bullet points.",
     "STRUCTURAL": "Numbered definitions, 4+ items (150-300 words).",
     "OBLIGATION": "Formal obligations (250+ words). Must/shall language. Complete enforceable statements.",
     "EVIDENCE":   "Data-driven analysis (200+ words). Specific findings. Table if numerical data present.",
@@ -58,12 +58,12 @@ def _format_answers(answers: dict) -> str:
     parts = []
     if answered:
         parts.append(
-            "ANSWERED FIELDS - rephrase professionally without changing the meaning:\n"
+            "ANSWERED FIELDS - mandatory source content; preserve the user's exact meaning and rephrase only for grammar, clarity, tone, and formatting:\n"
             + "\n".join(answered)
         )
     if unanswered:
         parts.append(
-            "UNANSWERED FIELDS - generate professional content naturally where needed:\n"
+            "UNANSWERED FIELDS - add only neutral, context-safe professional wording where needed; do not invent factual, financial, legal, HR policy, or employment-term specifics:\n"
             + "\n".join(unanswered)
         )
     return "\n\n".join(parts) if parts else "  No specific details provided — use professional defaults."
@@ -143,6 +143,8 @@ def _section_prompt(section_name, template_name, dept_name, answers, company, fe
         "Do not use tables, pipe-delimited rows, markdown tables, or tabular columns.\n"
         if _feedback_requests_no_table(feedback) else ""
     )
+    document_specific_rules = prompt_service._document_specific_prompt(template_name)
+    answer_coverage_rules = prompt_service._answer_coverage_prompt(answers or {})
 
     prompt = (
         f"Regenerate the '{section_name}' section for a {template_name} document.\n\n"
@@ -153,7 +155,9 @@ def _section_prompt(section_name, template_name, dept_name, answers, company, fe
         + (f"\nFEEDBACK: {feedback}\n" if feedback else "")
         + (f"\nSTYLE REFERENCE:\n{style_snippet}\n" if style_snippet else "")
         + f"\nVARIABLE DATA:\n{_format_answers(answers or {})}\n\n"
-        "Rules: content body only, no heading, no markdown. Rephrase answered values professionally without changing their meaning, facts, or intent."
+        + answer_coverage_rules
+        + document_specific_rules
+        + "Rules: content body only, no heading, no markdown. Rephrase answered values professionally without changing their meaning, facts, or intent. Every answered field relevant to this section must be visibly represented."
     )
     return system, prompt
 
