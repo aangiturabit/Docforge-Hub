@@ -1,0 +1,40 @@
+{
+  "run_name": "default",
+  "timestamp": "2026-05-27T06:29:39.973827",
+  "config": {
+    "top_k": 8,
+    "doc_type": null,
+    "department": null
+  },
+  "total": 1,
+  "results": [
+    {
+      "question": "How are incidents escalated during SLA breaches?",
+      "answer": "Incidents are escalated during SLA breaches by following a structured four-level escalation process. Initially, the Support Team (Level 1) handles the incident. If unresolved or requiring deeper technical intervention, it escalates to Level 2, the DevOps and Site Reliability Engineering teams. Further escalation to Level 3 involves Engineering Leads for strategic oversight, and the highest Level 4 engages the CTO or Executive Team for critical decisions. Communication protocols require immediate notification via Slack, PagerDuty, or similar channels upon escalation, with regular updates provided to stakeholders. After resolution, a post-incident report is prepared to document the incident and preventive measures.",
+      "contexts": [
+        "## Escalation Process\nEscalation is triggered when incidents remain unresolved within defined SLAs, or when issues are classified as high or critical severity, including security breaches or risks of data loss. The escalation process is structured into four levels to ensure appropriate expertise and authority are engaged promptly.\nLevel 1 involves the Support Team, responsible for initial incident handling and triage. If the issue requires deeper technical intervention, it escalates to Level 2, the DevOps and Site Reliability Engineering teams, who manage infrastructure and system reliability. Level 3 involves Engineering Leads who provide strategic oversight and coordinate cross-team efforts. The highest level, Level 4, engages the Chief Technology Officer (CTO) or Executive Team for critical decision-making and resource allocation.\nCommunication protocols mandate immediate notification through Slack, PagerDuty, or equivalent channels upon escalation. Incident updates are provided at regular intervals to keep all stakeholders informed. Following resolution, a comprehensive post-incident report is prepared to document findings, actions taken, and recommendations for future prevention. This structured escalation framework ensures timely resolution and continuous operational improvement."
+      ],
+      "citations": [
+        {
+          "source_number": 1,
+          "breadcrumb": "DevOps Runbook > Escalation Process",
+          "doc_type": "Runbook",
+          "department": "DevOps",
+          "title": "DevOps Runbook",
+          "url": "https://www.notion.so/DevOps-Runbook-3533ac0eafaf81c8a6b5e49be96df5a5",
+          "score": 0.6,
+          "compare_side": ""
+        }
+      ],
+      "status": "success",
+      "ragas": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 1.0
+      }
+    }
+  ],
+  "aggregate": {
+    "faithfulness": 1.0,
+    "answer_relevancy": 1.0
+  }
+}
