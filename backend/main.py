@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.routers import departments, templates, generate, sessions, notion, documents, download
 from backend.routers.ingest import router as ingest_router
 from backend.routers.query import router as query_router
+from backend.routers.agent import router as agent_router
+
 
 app = FastAPI(
     title="DocForge Hub",
@@ -26,6 +28,7 @@ app.include_router(sessions.router, prefix="/api", tags=["Sessions"])
 app.include_router(notion.router, prefix="/api", tags=["Notion"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 app.include_router(download.router)
+app.include_router(agent_router)
 
 # RAG routers
 app.include_router(ingest_router)

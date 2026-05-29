@@ -6,6 +6,7 @@ import streamlit as st
 
 API_BASE = "http://localhost:8000/api"
 RAG_BASE = "http://localhost:8000/rag"
+AGENT_BASE = "http://localhost:8000/agent"
 
 st.set_page_config(
     page_title="DocForge Hub",
@@ -64,6 +65,39 @@ def api_delete(path, show_error=True):
         if show_error:
             st.error(str(e))
         return False
+
+
+def agent_get(path, params=None, show_error=True):
+    try:
+        r = requests.get(f"{AGENT_BASE}{path}", params=params, timeout=30)
+        if r.status_code == 200:
+            return r.json()
+        if show_error:
+            st.error(f"Agent API {r.status_code}: {r.text[:200]}")
+        return None
+    except requests.exceptions.ConnectionError:
+        if show_error:
+            st.error("Cannot connect to agent backend. Is the server running?")
+        return None
+    except Exception as e:
+        if show_error:
+            st.error(str(e))
+        return None
+
+
+def agent_post(path, body, show_error=True):
+    try:
+        r = requests.post(f"{AGENT_BASE}{path}", json=body, timeout=180)
+        if r.status_code == 200:
+            return r.json(), None
+        err = r.text[:200]
+        if show_error:
+            st.error(f"Agent API {r.status_code}: {err}")
+        return None, err
+    except requests.exceptions.ConnectionError:
+        return None, "Cannot connect to agent backend"
+    except Exception as e:
+        return None, str(e)
 
 
 def fetch_pdf(document_id: int, company: dict = None):
@@ -197,6 +231,9 @@ _defaults = {
     "_do_preview":       False,
     "_do_regen_section": None,
     "_regen_feedback":   "",
+    "agent_session_id":  None,
+    "agent_turns":       [],
+    "agent_tickets":     None,
     "company": {
         "name": "", "industry": "", "size": "",
         "location": "", "tone": "Professional",
@@ -250,7 +287,12 @@ st.divider()
 # TABS
 # ═══════════════════════════════════════════════════════
 
-tab_generate, tab_library, tab_rag = st.tabs(["  Generate  ", "  Document Library  ", "  RAG Assistant  "])
+tab_generate, tab_library, tab_rag, tab_agent = st.tabs([
+    "  Generate  ",
+    "  Document Library  ",
+    "  RAG Assistant  ",
+    "  Agent  ",
+])
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -997,6 +1039,144 @@ with tab_rag:
                         r2.metric("Answer Relevancy", str(ragas.get("answer_relevancy")))
                     st.markdown(item.get("answer", ""))
                     render_sources(item.get("citations", []))
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# TAB 4 — AGENT
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+with tab_agent:
+    st.markdown("## Agent Assistant")
+    st.caption("Chat with the LangGraph agent and raise support tickets when needed.")
+
+    a_col1, a_col2, a_col3 = st.columns([1, 1, 1])
+    with a_col1:
+        st.metric("Session", st.session_state.agent_session_id or "New")
+    with a_col2:
+        if st.button("New Session", use_container_width=True):
+            st.session_state.agent_session_id = None
+            st.session_state.agent_turns = []
+            st.rerun()
+    with a_col3:
+        if st.button("Refresh Tickets", use_container_width=True):
+            st.session_state.agent_tickets = agent_get("/tickets", show_error=True)
+
+    st.divider()
+
+    for idx, turn in enumerate(st.session_state.agent_turns):
+        with st.chat_message("user"):
+            st.markdown(turn["question"])
+
+        with st.chat_message("assistant"):
+            st.markdown(turn.get("response", "No response."))
+            meta = []
+            if turn.get("intent"):
+                meta.append(f"Intent: {turn['intent']}")
+            if turn.get("confidence"):
+                meta.append(f"Confidence: {turn['confidence']}")
+            if turn.get("trace_id"):
+                meta.append(f"Trace: {turn['trace_id']}")
+            if meta:
+                st.caption(" | ".join(meta))
+
+            citations = turn.get("citations", [])
+            if citations:
+                st.markdown("**Sources:**")
+                for c in citations:
+                    st.markdown(f"- **{c.get('breadcrumb', 'Source')}**")
+
+            if turn.get("cannot_answer") and not turn.get("ticket_created"):
+                if st.button("Create Ticket", key=f"agent_ticket_{idx}"):
+                    sources = [
+                        c.get("breadcrumb", "")
+                        for c in citations
+                        if c.get("breadcrumb")
+                    ]
+                    ticket_data, ticket_err = agent_post(
+                        "/create-ticket",
+                        {
+                            "session_id": st.session_state.agent_session_id,
+                            "question": turn["question"],
+                            "sources": sources,
+                        },
+                    )
+                    if ticket_data:
+                        turn["ticket_created"] = True
+                        turn["ticket_status"] = ticket_data.get("status")
+                        turn["ticket_url"] = ticket_data.get("ticket_url")
+                        st.success(ticket_data.get("message", "Ticket created."))
+                        if ticket_data.get("ticket_url"):
+                            st.markdown(f"[Open ticket]({ticket_data['ticket_url']})")
+                    else:
+                        st.error(ticket_err or "Could not create ticket.")
+
+            if turn.get("ticket_created"):
+                status = turn.get("ticket_status", "created")
+                st.success(f"Ticket {status}.")
+                if turn.get("ticket_url"):
+                    st.markdown(f"[Open ticket]({turn['ticket_url']})")
+
+    agent_question = st.chat_input("Ask the agent...", key="agent_chat_input")
+    if agent_question:
+        with st.chat_message("user"):
+            st.markdown(agent_question)
+
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                payload = {
+                    "message": agent_question,
+                    "session_id": st.session_state.agent_session_id,
+                }
+                result, err = agent_post("/chat", payload)
+
+            if result:
+                st.session_state.agent_session_id = result.get("session_id")
+                turn = {
+                    "question": agent_question,
+                    "response": result.get("response", ""),
+                    "intent": result.get("intent"),
+                    "confidence": result.get("confidence"),
+                    "citations": result.get("citations", []),
+                    "cannot_answer": result.get("cannot_answer", False),
+                    "ticket_id": result.get("ticket_id"),
+                    "ticket_url": result.get("ticket_url"),
+                    "ticket_created": bool(result.get("ticket_url")),
+                    "ticket_status": "created" if result.get("ticket_url") else None,
+                    "trace_id": result.get("trace_id"),
+                }
+                st.session_state.agent_turns.append(turn)
+                st.markdown(turn["response"] or "No response.")
+                meta = []
+                if turn.get("intent"):
+                    meta.append(f"Intent: {turn['intent']}")
+                if turn.get("confidence"):
+                    meta.append(f"Confidence: {turn['confidence']}")
+                if turn.get("trace_id"):
+                    meta.append(f"Trace: {turn['trace_id']}")
+                if meta:
+                    st.caption(" | ".join(meta))
+                st.rerun()
+            else:
+                st.error(err or "Agent request failed.")
+
+    with st.expander("Tickets", expanded=False):
+        tickets_data = st.session_state.agent_tickets
+        if tickets_data is None:
+            st.info("Click Refresh Tickets to load support tickets.")
+        else:
+            tickets = tickets_data.get("tickets", [])
+            if not tickets:
+                st.info("No tickets found.")
+            for ticket in tickets:
+                st.markdown(
+                    f"**{ticket.get('title', 'Unknown')}**  \n"
+                    f"Status: `{ticket.get('status', 'Unknown')}` | "
+                    f"Priority: `{ticket.get('priority', 'Unknown')}` | "
+                    f"Session: `{ticket.get('session_id', '')}`"
+                )
+                if ticket.get("url"):
+                    st.markdown(f"[Open in Notion]({ticket['url']})")
+                st.divider()
 
 
 st.caption("DocForge Hub · Powered by AI")

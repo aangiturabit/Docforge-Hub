@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="760" viewBox="0 0 1120 760" role="img" aria-labelledby="title desc">
+  <title id="title">DocForge LangGraph Agent Flow</title>
+  <desc id="desc">SVG diagram of the compiled LangGraph defined in backend/agent/graph.py.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#334155" />
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 28px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 14px Arial, sans-serif; fill: #475569; }
+      .node { fill: #ffffff; stroke: #2563eb; stroke-width: 2; rx: 8; }
+      .node-alt { fill: #ecfeff; stroke: #0891b2; stroke-width: 2; rx: 8; }
+      .node-end { fill: #f1f5f9; stroke: #64748b; stroke-width: 2; rx: 8; }
+      .node-warn { fill: #fff7ed; stroke: #f97316; stroke-width: 2; rx: 8; }
+      .label { font: 700 15px Arial, sans-serif; fill: #0f172a; text-anchor: middle; dominant-baseline: middle; }
+      .small { font: 400 12px Arial, sans-serif; fill: #475569; text-anchor: middle; dominant-baseline: middle; }
+      .edge { fill: none; stroke: #334155; stroke-width: 2.2; marker-end: url(#arrow); }
+      .edge-label { font: 700 12px Arial, sans-serif; fill: #1e293b; }
+      .edge-box { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1; rx: 5; }
+      .legend-title { font: 700 14px Arial, sans-serif; fill: #0f172a; }
+      .legend-text { font: 400 12px Arial, sans-serif; fill: #475569; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1120" height="760" />
+  <text class="title" x="48" y="54">DocForge LangGraph Agent Flow</text>
+  <text class="subtitle" x="48" y="80">Generated from docforge/backend/agent/graph.py with direct create-ticket routing.</text>
+
+  <!-- Main reachable graph -->
+  <rect class="node-alt" x="470" y="116" width="180" height="58" />
+  <text class="label" x="560" y="139">intent_node</text>
+  <text class="small" x="560" y="158">entry point</text>
+
+  <rect class="node" x="118" y="262" width="180" height="58" />
+  <text class="label" x="208" y="285">clarify_node</text>
+  <text class="small" x="208" y="304">intent == unclear</text>
+
+  <rect class="node" x="470" y="262" width="180" height="58" />
+  <text class="label" x="560" y="285">retrieve_node</text>
+  <text class="small" x="560" y="304">default question flow</text>
+
+  <rect class="node" x="470" y="400" width="180" height="58" />
+  <text class="label" x="560" y="423">evaluate_node</text>
+  <text class="small" x="560" y="442">route by confidence</text>
+
+  <rect class="node" x="294" y="538" width="180" height="58" />
+  <text class="label" x="384" y="561">answer_node</text>
+  <text class="small" x="384" y="580">confidence == high</text>
+
+  <rect class="node-warn" x="646" y="538" width="180" height="58" />
+  <text class="label" x="736" y="561">notify_node</text>
+  <text class="small" x="736" y="580">notify / response</text>
+
+  <rect class="node" x="822" y="262" width="180" height="58" />
+  <text class="label" x="912" y="285">fetch_ticket_node</text>
+  <text class="small" x="912" y="304">intent == ticket_status</text>
+
+  <rect class="node" x="822" y="400" width="180" height="58" />
+  <text class="label" x="912" y="423">check_ticket_node</text>
+  <text class="small" x="912" y="442">intent == create_ticket</text>
+
+  <rect class="node" x="822" y="538" width="180" height="58" />
+  <text class="label" x="912" y="561">create_ticket_node</text>
+  <text class="small" x="912" y="580">new ticket only</text>
+
+  <rect class="node-end" x="470" y="666" width="180" height="46" />
+  <text class="label" x="560" y="690">END</text>
+
+  <!-- Intent conditional edges -->
+  <path class="edge" d="M470,145 C350,145 208,190 208,252" />
+  <rect class="edge-box" x="270" y="164" width="118" height="24" />
+  <text class="edge-label" x="282" y="181">unclear</text>
+
+  <path class="edge" d="M560,174 L560,252" />
+  <rect class="edge-box" x="578" y="200" width="116" height="24" />
+  <text class="edge-label" x="590" y="217">question / other</text>
+
+  <path class="edge" d="M650,145 C770,145 912,190 912,252" />
+  <rect class="edge-box" x="738" y="164" width="130" height="24" />
+  <text class="edge-label" x="750" y="181">ticket_status</text>
+
+  <path class="edge" d="M650,159 C822,198 912,284 912,390" />
+  <rect class="edge-box" x="804" y="210" width="116" height="24" />
+  <text class="edge-label" x="816" y="227">create_ticket</text>
+
+  <!-- Main flow edges -->
+  <path class="edge" d="M560,320 L560,390" />
+  <path class="edge" d="M470,429 C415,429 384,478 384,528" />
+  <rect class="edge-box" x="372" y="464" width="54" height="24" />
+  <text class="edge-label" x="383" y="481">high</text>
+
+  <path class="edge" d="M650,429 C705,429 736,478 736,528" />
+  <rect class="edge-box" x="710" y="464" width="86" height="24" />
+  <text class="edge-label" x="722" y="481">low / out_of_kb</text>
+
+  <path class="edge" d="M474,567 L636,567" />
+  <rect class="edge-box" x="517" y="532" width="86" height="24" />
+  <text class="edge-label" x="529" y="549">after answer</text>
+
+  <path class="edge" d="M736,596 C736,642 660,689 660,689" />
+  <path class="edge" d="M208,320 C208,592 470,689 460,689" />
+  <path class="edge" d="M912,320 C912,592 660,689 660,689" />
+  <path class="edge" d="M912,458 L912,528" />
+  <rect class="edge-box" x="930" y="478" width="82" height="24" />
+  <text class="edge-label" x="942" y="495">not exists</text>
+  <path class="edge" d="M822,429 C780,429 748,476 740,528" />
+  <rect class="edge-box" x="728" y="432" width="70" height="24" />
+  <text class="edge-label" x="740" y="449">exists</text>
+  <path class="edge" d="M822,567 L836,567" />
+
+  <!-- Legend -->
+  <rect x="48" y="650" width="250" height="54" rx="8" fill="#ffffff" stroke="#cbd5e1" />
+  <text class="legend-title" x="66" y="675">Legend</text>
+  <line x1="66" y1="695" x2="112" y2="695" class="edge" />
+  <text class="legend-text" x="126" y="699">Compiled reachable edge</text>
+</svg>
