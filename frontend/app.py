@@ -1180,3 +1180,4 @@ with tab_agent:
 
 
 st.caption("DocForge Hub · Powered by AI")
+
