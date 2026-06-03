@@ -565,3 +565,4 @@ The document must contain structured sections. If a legacy/plain document has no
 ## License
 
 Add your preferred license before publishing this repository publicly.
+
