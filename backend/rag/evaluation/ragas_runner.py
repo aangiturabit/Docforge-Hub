@@ -1,9 +1,23 @@
 import os
 import json
 import math
+import sys
+import types
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
+
+# RAGAS 0.4.x imports this VertexAI adapter at module load time even when the
+# evaluation uses Azure OpenAI. Newer langchain-community versions no longer
+# expose this module path, so provide a minimal import shim.
+if "langchain_community.chat_models.vertexai" not in sys.modules:
+    vertexai_shim = types.ModuleType("langchain_community.chat_models.vertexai")
+
+    class ChatVertexAI:
+        pass
+
+    vertexai_shim.ChatVertexAI = ChatVertexAI
+    sys.modules["langchain_community.chat_models.vertexai"] = vertexai_shim
 
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy

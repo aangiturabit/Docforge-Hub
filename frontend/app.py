@@ -234,6 +234,7 @@ _defaults = {
     "agent_session_id":  None,
     "agent_turns":       [],
     "agent_tickets":     None,
+    "rag_evaluate_result": None,
     "company": {
         "name": "", "industry": "", "size": "",
         "location": "", "tone": "Professional",
@@ -1010,10 +1011,18 @@ with tab_rag:
         if st.button("Run Evaluation", type="primary"):
             questions = [q.strip() for q in questions_input.strip().split("\n") if q.strip()]
             if questions:
+                st.session_state.rag_evaluate_result = None
                 with st.spinner(f"Running {len(questions)} questions..."):
                     try:
                         r = requests.post(f"{RAG_BASE}/rag-evaluate", json={"questions": questions}, timeout=300)
-                        st.session_state.rag_evaluate_result = r.json()
+                        if r.status_code == 200:
+                            st.session_state.rag_evaluate_result = r.json()
+                        else:
+                            try:
+                                detail = r.json().get("detail", r.text)
+                            except Exception:
+                                detail = r.text
+                            st.error(f"Evaluation failed ({r.status_code}): {detail}")
                     except Exception as e:
                         st.error(f"Error: {e}")
             else:
@@ -1180,4 +1189,3 @@ with tab_agent:
 
 
 st.caption("DocForge Hub · Powered by AI")
-

@@ -1,6 +1,6 @@
 {
   "run_name": "default",
-  "timestamp": "2026-05-27T06:29:39.973827",
+  "timestamp": "2026-06-04T06:12:38.537290",
   "config": {
     "top_k": 8,
     "doc_type": null,
@@ -9,32 +9,43 @@
   "total": 1,
   "results": [
     {
-      "question": "How are incidents escalated during SLA breaches?",
-      "answer": "Incidents are escalated during SLA breaches by following a structured four-level escalation process. Initially, the Support Team (Level 1) handles the incident. If unresolved or requiring deeper technical intervention, it escalates to Level 2, the DevOps and Site Reliability Engineering teams. Further escalation to Level 3 involves Engineering Leads for strategic oversight, and the highest Level 4 engages the CTO or Executive Team for critical decisions. Communication protocols require immediate notification via Slack, PagerDuty, or similar channels upon escalation, with regular updates provided to stakeholders. After resolution, a post-incident report is prepared to document the incident and preventive measures.",
+      "question": "Evaluate whether the NDA sufficiently protects confidential information.",
+      "answer": "The NDA sufficiently protects confidential information by clearly establishing the purpose of safeguarding proprietary, technical, commercial, or strategic information exchanged between the parties. It sets forth terms and conditions for handling confidential information, including obligations to prevent unauthorized use or disclosure. The agreement also outlines the scope of information covered, duration of confidentiality obligations, and remedies available in case of breach, providing a comprehensive framework to manage sensitive data responsibly and securely. Additionally, the NDA specifies the parties involved, identifying Turabit solutions as the Disclosing Party and the employee as the Receiving Party, which clarifies roles and responsibilities in maintaining confidentiality.",
       "contexts": [
-        "## Escalation Process\nEscalation is triggered when incidents remain unresolved within defined SLAs, or when issues are classified as high or critical severity, including security breaches or risks of data loss. The escalation process is structured into four levels to ensure appropriate expertise and authority are engaged promptly.\nLevel 1 involves the Support Team, responsible for initial incident handling and triage. If the issue requires deeper technical intervention, it escalates to Level 2, the DevOps and Site Reliability Engineering teams, who manage infrastructure and system reliability. Level 3 involves Engineering Leads who provide strategic oversight and coordinate cross-team efforts. The highest level, Level 4, engages the Chief Technology Officer (CTO) or Executive Team for critical decision-making and resource allocation.\nCommunication protocols mandate immediate notification through Slack, PagerDuty, or equivalent channels upon escalation. Incident updates are provided at regular intervals to keep all stakeholders informed. Following resolution, a comprehensive post-incident report is prepared to document findings, actions taken, and recommendations for future prevention. This structured escalation framework ensures timely resolution and continuous operational improvement."
+        "## Purpose\nThis Non-Disclosure Agreement (NDA) is established to protect the confidentiality of sensitive information exchanged between the parties involved. The purpose of this agreement is to ensure that any proprietary, technical, commercial, or strategic information shared during the course of discussions, collaborations, or business dealings remains strictly confidential and is not disclosed to unauthorized third parties. Both parties acknowledge the importance of safeguarding such information to maintain competitive advantage and uphold trust. This agreement sets forth the terms and conditions under which confidential information will be handled, including the obligations of the receiving party to prevent unauthorized use or disclosure. By entering into this agreement, the parties commit to a mutual understanding that the protection of confidential information is essential for the success and integrity of their business relationship. The NDA also outlines the scope of information covered, the duration of confidentiality obligations, and the remedies available in case of breach, thereby providing a clear framework to manage sensitive data responsibly and securely.",
+        "## Parties Involved\nThis Non-Disclosure Agreement (NDA) is entered into between Turabit solutions, a SaaS company headquartered in Pune, and the employee receiving confidential information. Turabit solutions is the Disclosing Party, and the employee is the Receiving Party. Both parties agree to the terms set forth herein to protect the confidentiality of proprietary and sensitive information shared during the course of employment."
       ],
       "citations": [
         {
           "source_number": 1,
-          "breadcrumb": "DevOps Runbook > Escalation Process",
-          "doc_type": "Runbook",
-          "department": "DevOps",
-          "title": "DevOps Runbook",
-          "url": "https://www.notion.so/DevOps-Runbook-3533ac0eafaf81c8a6b5e49be96df5a5",
-          "score": 0.6,
+          "breadcrumb": "Non-Disclosure Agreement > Purpose",
+          "doc_type": "Non-Disclosure Agreement",
+          "department": "Legal",
+          "title": "Non-Disclosure Agreement",
+          "url": "https://www.notion.so/Non-Disclosure-Agreement-3563ac0eafaf8191a8b5e42a68fbc11a",
+          "score": 1.0,
+          "compare_side": ""
+        },
+        {
+          "source_number": 2,
+          "breadcrumb": "Non-Disclosure Agreement > Parties Involved",
+          "doc_type": "Non-Disclosure Agreement",
+          "department": "Legal",
+          "title": "Non-Disclosure Agreement",
+          "url": "https://www.notion.so/Non-Disclosure-Agreement-3573ac0eafaf8139826fff03c477f27b",
+          "score": 0.5657610085830662,
           "compare_side": ""
         }
       ],
       "status": "success",
       "ragas": {
-        "faithfulness": 1.0,
-        "answer_relevancy": 1.0
+        "faithfulness": 0.9167,
+        "answer_relevancy": 0.6787
       }
     }
   ],
   "aggregate": {
-    "faithfulness": 1.0,
-    "answer_relevancy": 1.0
+    "faithfulness": 0.9167,
+    "answer_relevancy": 0.6787
   }
 }
